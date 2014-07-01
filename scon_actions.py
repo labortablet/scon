@@ -8,12 +8,15 @@ __maintainer__ = "Frederik Lauber"
 __status__ = "Development"
 __contact__ = "https://flambda.de/impressum.html"
 
-import pymysql
 import uuid
 import configparser
 import hashlib
 import base64
 import cgitb
+
+import pymysql
+
+
 cgitb.enable()
 
 SERVER_STABLE_RANDOM = u"sadsdasdassadsd"
@@ -21,6 +24,16 @@ SERVER_STABLE_RANDOM = u"sadsdasdassadsd"
 
 class LabletBaseException(Exception):
 	pass
+
+
+#encode and decode a binary as a abs64 encoded string
+#will return a unicode object so we are independent from transmission encoding
+def _uni2bin(uni):
+	return base64.b64decode(uni.encode("ascii"))
+
+
+def _bin2uni(bin):
+	return base64.b64encode(bin).decode("ascii")
 
 
 _config = configparser.ConfigParser()
@@ -55,19 +68,6 @@ def _get_userid_and_salt(username):
 		salt = m.digest()
 		return ("null", salt)
 
-
-#key = uuid.uuid4()
-#print 'inserting', repr(key.bytes)
-#r = conn.cursor()
-#r.execute('INSERT INTO xyz (id) VALUES (%s)', key.bytes)
-#conn.commit()
-
-#print 'selecting', repr(key.bytes)
-#r.execute('SELECT added_id, id FROM xyz WHERE id = %s', key.bytes)
-#for row in r.fetchall():
-#    print row[0], binascii.b2a_hex(row[1])
-
-
 def test(**kwargs):
 	return kwargs
 
@@ -84,19 +84,20 @@ def get_challenge(username):
 		                (session_id, user_id, challenge))
 	except Exception:
 		return {"status": "failed"}
-	return {"status": "success", 
-	"session_id": base64.b64encode(session_id).decode("ascii"), 
-	"salt":  base64.b64encode(salt).decode("ascii"), 
-	"challenge": base64.b64encode(challenge).decode("ascii")}
+	return {"status": "success",
+	        "session_id": _bin2uni(session_id),
+	        "salt": _bin2uni(salt),
+	        "challenge": _bin2uni(challenge)}
 
 
 def auth_session(session_id, response):
 	#FIXME not yet implemented as database is not far enought yet
 	return {"status": "success"}
 
+
 def get_projects(session_id):
-	session_id_base64 = base64.b64decode(session_id.encode("ascii"))
-	session_id = uuid.UUID(bytes=session_id_base64)
+	session_id = uuid.UUID(bytes=_uni2bin(session_id))
+	#FIXME we most likely want to use a view here.
 	_cursor.execute("""SELECT projects.project_id, projects.project_name, projects.project_description
 	FROM `projects`
 	INNER JOIN `project_group`
@@ -111,16 +112,48 @@ def get_projects(session_id):
 	projects = _cursor.fetchall()
 	return {"status": "success", "projects": projects}
 
-def get_last_entry_ids(session_id, entry_count):
-	return {"status": "success"}
+
+def get_experiments(session_id):
+	session_id = uuid.UUID(bytes=_uni2bin(session_id))
+	#FIXME we most likely want to use a view here.
+	_cursor.execute("""SELECT experiments.expr_id, experiments.expr_name, experiments.expr_description
+	FROM `experiments`
+	INNER JOIN `projects`
+	ON projects.project_id = experiments.project_id
+	INNER JOIN `project_group`
+	ON project_group.project_id = projects.project_id
+	INNER JOIN `user_group`
+	ON user_group.group_id = project_group.group_id
+	INNER JOIN `user`
+	ON user_group.user_id = user.user_id
+	INNER JOIN `user_session`
+	ON user_session.user_id = user.user_id
+	WHERE user_session.authorized = True AND user_session.session_id = %s""", session_id.bytes)
+	experiments = _cursor.fetchall()
+	return {"status": "success", "experiments": experiments}
+
+
+def get_last_entry_ids(session_id, experiment_id, entry_count):
+	session_id = uuid.UUID(bytes=_uni2bin(session_id))
+	#FIXME we most likely want to use a view here.
+	_cursor.execute("""SELECT res_id
+	FROM `exp_result`
+	INNER JOIN `experiments`
+	ON experiments.expr_id = exp_result.expr_id
+	INNER JOIN `projects`
+	ON projects.project_id = experiments.project_id
+	INNER JOIN `project_group`
+	ON project_group.project_id = projects.project_id
+	INNER JOIN `user_group`
+	ON user_group.group_id = project_group.group_id
+	INNER JOIN `user`
+	ON user_group.user_id = user.user_id
+	INNER JOIN `user_session`
+	ON user_session.user_id = user.user_id
+	WHERE user_session.authorized = True AND user_session.session_id = %s""", session_id.bytes)
+	entry_ids = _cursor.fetchall()
+	return {"status": "success", "entry_ids": entry_ids}
+
 
 def get_entry(session_id, entry_id):
 	return {"status": "success"}
-
-action_dict = {"test": test,
-               "get_entry": get_entry,
-               "get_last_entry_ids": get_last_entry_ids,
-               "get_projects": get_projects,
-               "auth_session": auth_session,
-               "get_challenge":get_challenge}
-
