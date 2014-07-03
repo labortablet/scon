@@ -51,9 +51,25 @@ def get_projects(session_id):
 	data = {"action": "get_projects", "session_id": session_id}
 	return _prepare_data_and_response(data)
 
+
+def get_experiments(session_id):
+	data = {"action": "get_experiments", "session_id": session_id}
+	return _prepare_data_and_response(data)
+
+
+def get_last_entry_ids(session_id, experiment_id, entry_count):
+	data = {"action": "get_last_entry_ids", "experiment_id": experiment_id, "session_id": session_id}
+	return _prepare_data_and_response(data)
+
+
 tmp = get_challenge("fredi@uni-siegen.de")
 challenge = tmp["challenge"]
 session_id = tmp["session_id"]
-print(challenge)
-print(session_id)
-print(get_projects(session_id))
+print("Challenge: " + challenge)
+print("Session_id: " + session_id)
+projects = get_projects(session_id)
+print("Projects:")
+print(projects)
+experiments = get_experiments(session_id)
+print("Experiments")
+print(experiments)
