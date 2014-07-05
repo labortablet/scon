@@ -32,7 +32,7 @@ def get_entry(session_id, entry_id):
 
 def _prepare_data_and_response(data):
 	headers = dict()
-	headers['Content-Type'] = 'application/json'
+	headers['Content-Type'] = 'application/json;charset=utf-8'
 	json_data = json.dumps(data)
 	post_data = json_data.encode('utf-8')
 	req = urllib.request.Request(url, post_data, headers)
