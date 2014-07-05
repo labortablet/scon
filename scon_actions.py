@@ -103,7 +103,7 @@ def get_projects(session_id):
 	FROM `projects`
 	INNER JOIN `projects_groups`
 	ON projects_groups.project_id = projects.project_id
-	INNER JOIN `user_group`
+	INNER JOIN `users_groups`
 	ON users_groups.group_id = projects_groups.group_id
 	INNER JOIN `users`
 	ON users_groups.user_id = users.user_id
