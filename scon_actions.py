@@ -101,7 +101,7 @@ def get_projects(session_id):
 	#FIXME we most likely want to use a view here.
 	_cursor.execute("""SELECT projects.project_id, projects.project_name, projects.project_description
 	FROM `projects`
-	INNER JOIN `project_group`
+	INNER JOIN `projects_groups`
 	ON projects_groups.project_id = projects.project_id
 	INNER JOIN `user_group`
 	ON users_groups.group_id = projects_groups.group_id
