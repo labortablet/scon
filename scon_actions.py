@@ -117,8 +117,7 @@ def get_projects(session_id):
 def get_experiments(session_id):
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
 	#FIXME we most likely want to use a view here.
-	#FIXME added a tippo as the database still has it...
-	_cursor.execute("""SELECT projects.project_id, experiments.expr_id, experiments.expr_name, experiments.expr_describtion
+	_cursor.execute("""SELECT projects.project_id, experiments.expr_id, experiments.expr_name, experiments.expr_description
 	FROM `experiments`
 	INNER JOIN `projects`
 	ON projects.project_id = experiments.project_id
