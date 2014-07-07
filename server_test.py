@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 __author__ = "Frederik Lauber"
 __copyright__ = "Copyright 2014"
 __license__ = "GPL3"
