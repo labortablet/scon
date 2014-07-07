@@ -19,6 +19,7 @@ import pymysql
 
 cgitb.enable()
 
+#FIXME needs to be stable over a long time
 SERVER_STABLE_RANDOM = u"sadsdasdassadsd"
 
 
@@ -51,22 +52,19 @@ _cursor = _database.cursor()
 
 
 def _get_userid_and_salt(username):
-	_cursor.execute("""SELECT id, password FROM `users` WHERE user_email = %s""", username)
+	_cursor.execute("""SELECT id, salt FROM `users` WHERE email = %s""", username)
 	user_list = _cursor.fetchall()
-	#FIXME salt in database is not of binary type yet
 	if len(user_list) == 1:
 		user_id = user_list[0][0]
 		salt = user_list[0][1]
-		m = hashlib.md5()
-		m.update(salt.encode("utf-8"))
-		salt = m.digest()
-		return (user_id, salt)
+		return user_id, salt
 	else:
 		m = hashlib.md5()
 		m.update(username.encode("utf-8"))
 		m.update(SERVER_STABLE_RANDOM.encode("utf-8"))
 		salt = m.digest()
-		return ("null", salt)
+		return "null", salt
+
 
 def test(**kwargs):
 	return kwargs
