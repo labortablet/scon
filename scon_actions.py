@@ -74,8 +74,7 @@ def get_challenge(username):
 	session_id = uuid.uuid4().bytes
 	challenge = uuid.uuid4().bytes
 	(user_id, salt) = _get_userid_and_salt(username)
-	#FIXME
-	#right now all sessions are authorized!!!!!
+	#FIXME right now all sessions are authorized!!!!!
 	#I cannot implement authorisation as the database is still missing the needed fields
 	try:
 		_cursor.execute(
