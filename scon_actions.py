@@ -51,7 +51,7 @@ _cursor = _database.cursor()
 
 
 def _get_userid_and_salt(username):
-	_cursor.execute("""SELECT user_id, password FROM `users` WHERE user_email = %s""", username)
+	_cursor.execute("""SELECT id, password FROM `users` WHERE user_email = %s""", username)
 	user_list = _cursor.fetchall()
 	#FIXME salt in database is not of binary type yet
 	if len(user_list) == 1:
@@ -81,7 +81,7 @@ def get_challenge(username):
 	#I cannot implement authorisation as the database is still missing the needed fields
 	try:
 		_cursor.execute(
-			"""INSERT INTO sessions (session_id, user_id, session_challenge, authorized) VALUES (%s,%s,%s, True)""",
+			"""INSERT INTO sessions (id, user_id, challenge, authorized) VALUES (%s,%s,%s, True)""",
 			(session_id, user_id, challenge))
 	except Exception:
 		return {"status": "failed"}
@@ -99,17 +99,17 @@ def auth_session(session_id, response):
 def get_projects(session_id):
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
 	#FIXME we most likely want to use a view here.
-	_cursor.execute("""SELECT projects.project_id, projects.project_name, projects.project_description
+	_cursor.execute("""SELECT projects.id, projects.name, projects.description
 	FROM `projects`
 	INNER JOIN `projects_groups`
-	ON projects_groups.project_id = projects.project_id
+	ON projects_groups.project_id = projects.id
 	INNER JOIN `users_groups`
 	ON users_groups.group_id = projects_groups.group_id
 	INNER JOIN `users`
-	ON users_groups.user_id = users.user_id
+	ON users_groups.user_id = users.id
 	INNER JOIN `sessions`
-	ON sessions.user_id = users.user_id
-	WHERE sessions.authorized = True AND sessions.session_id = %s""", session_id.bytes)
+	ON sessions.user_id = users.id
+	WHERE sessions.authorized = True AND sessions.id = %s""", session_id.bytes)
 	projects = _cursor.fetchall()
 	return {"status": "success", "projects": projects}
 
@@ -117,19 +117,19 @@ def get_projects(session_id):
 def get_experiments(session_id):
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
 	#FIXME we most likely want to use a view here.
-	_cursor.execute("""SELECT projects.project_id, experiments.expr_id, experiments.expr_name, experiments.expr_description
+	_cursor.execute("""SELECT projects.id, experiments.id, experiments.name, experiments.description
 	FROM `experiments`
 	INNER JOIN `projects`
-	ON projects.project_id = experiments.project_id
+	ON projects.id = experiments.project_id
 	INNER JOIN `projects_groups`
-	ON projects_groups.project_id = projects.project_id
+	ON projects_groups.project_id = projects.id
 	INNER JOIN `users_groups`
 	ON users_groups.group_id = projects_groups.group_id
 	INNER JOIN `users`
-	ON users_groups.user_id = users.user_id
+	ON users_groups.user_id = users.id
 	INNER JOIN `sessions`
-	ON sessions.user_id = users.user_id
-	WHERE sessions.authorized = True AND sessions.session_id = %s""", session_id.bytes)
+	ON sessions.user_id = users.id
+	WHERE sessions.authorized = True AND sessions.id = %s""", session_id.bytes)
 	experiments = _cursor.fetchall()
 	return {"status": "success", "experiments": experiments}
 
@@ -137,21 +137,21 @@ def get_experiments(session_id):
 def get_last_entry_ids(session_id, experiment_id, entry_count):
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
 	#FIXME we most likely want to use a view here.
-	_cursor.execute("""SELECT res_id
+	_cursor.execute("""SELECT id
 	FROM `entries`
 	INNER JOIN `experiments`
-	ON experiments.expr_id = entries.expr_id
+	ON experiments.id = entries.expr_id
 	INNER JOIN `projects`
-	ON projects.project_id = experiments.project_id
+	ON projects.id = experiments.project_id
 	INNER JOIN `projects_groups`
-	ON projects_groups.project_id = projects.project_id
+	ON projects_groups.project_id = projects.id
 	INNER JOIN `users_groups`
 	ON users_groups.group_id = projects_groups.group_id
 	INNER JOIN `users`
-	ON users_groups.user_id = users.user_id
+	ON users_groups.user_id = users.id
 	INNER JOIN `sessions`
-	ON sessions.user_id = users.user_id
-	WHERE sessions.authorized = True AND sessions.session_id = %s""", session_id.bytes)
+	ON sessions.user_id = users.id
+	WHERE sessions.authorized = True AND sessions.id = %s""", session_id.bytes)
 	entry_ids = _cursor.fetchall()
 	return {"status": "success", "entry_ids": entry_ids}
 
