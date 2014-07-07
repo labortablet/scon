@@ -76,12 +76,12 @@ def get_challenge(username):
 	(user_id, salt) = _get_userid_and_salt(username)
 	#FIXME right now all sessions are authorized!!!!!
 	#I cannot implement authorisation as the database is still missing the needed fields
-	try:
-		_cursor.execute(
-			"""INSERT INTO sessions (id, user_id, challenge, authorized) VALUES (%s,%s,%s, True)""",
+	#try:
+	_cursor.execute(
+		"""INSERT INTO sessions (id, user_id, challenge, authorized) VALUES (%s,%s,%s, True)""",
 			(session_id, user_id, challenge))
-	except Exception:
-		return {"status": "failed"}
+	#except Exception:
+	#	return {"status": "failed"}
 	return {"status": "success",
 	        "session_id": _bin2uni(session_id),
 	        "salt": _bin2uni(salt),
