@@ -78,8 +78,11 @@ def get_challenge(username):
 	#I cannot implement authorisation as the database is still missing the needed fields
 	#try:
 	_cursor.execute(
-		"""INSERT INTO sessions (id, user_id, challenge, authorized) VALUES (%s,%s,%s, True)""",
-			(session_id, user_id, challenge))
+		"""INSERT INTO sessions(id, challenge, user_id, authorized) VALUES (%s,%s,%s, True)
+		SELECT users.id
+		FROM `users`
+		WHERE email = %s""",
+		(session_id, user_id, challenge, username))
 	#except Exception:
 	#	return {"status": "failed"}
 	return {"status": "success",
