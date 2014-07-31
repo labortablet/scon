@@ -97,7 +97,7 @@ def auth_session(session_id, response):
 
 def get_projects(session_id):
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
-	#FIXME we most likely want to use a view here.
+	#FIXME tipo but it is still in the database
 	_cursor.execute("""SELECT
 	users_projects_view.project_id,
 	users_projects_view.project_name,
@@ -107,7 +107,7 @@ def get_projects(session_id):
 	ON sessions.user_id = users_projects_view.user_id
 	WHERE sessions.authorized = True AND sessions.id = %s""", session_id.bytes)
 	projects = _cursor.fetchall()
-	return {"status": "success", "projects": len(projects)}
+	return {"status": "success", "projects": projects}
 
 
 def get_experiments(session_id):
