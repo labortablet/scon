@@ -62,7 +62,7 @@ def get_last_entry_ids(session_id, experiment_id, entry_count):
 	return _prepare_data_and_response(data)
 
 
-tmp = get_challenge("fredi223@uni-siegen.de")
+tmp = get_challenge("fredi@uni-siegen.de")
 challenge = tmp["challenge"]
 session_id = tmp["session_id"]
 print("Challenge: " + challenge)

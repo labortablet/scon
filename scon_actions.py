@@ -96,16 +96,13 @@ def auth_session(session_id, response):
 def get_projects(session_id):
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
 	#FIXME we most likely want to use a view here.
-	_cursor.execute("""SELECT projects.id, projects.name, projects.description
-	FROM `projects`
-	INNER JOIN `projects_groups`
-	ON projects_groups.project_id = projects.id
-	INNER JOIN `users_groups`
-	ON users_groups.group_id = projects_groups.group_id
-	INNER JOIN `users`
-	ON users_groups.user_id = users.id
+	_cursor.execute("""SELECT
+	users_projects_view.project_id,
+	users_projects_view.project_name,
+	users_projects_view.project_description
+	FROM `users_projects_view`
 	INNER JOIN `sessions`
-	ON sessions.user_id = users.id
+	ON sessions.user_id = users_projects_view.user_id
 	WHERE sessions.authorized = True AND sessions.id = %s""", session_id.bytes)
 	projects = _cursor.fetchall()
 	return {"status": "success", "projects": projects}
