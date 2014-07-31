@@ -80,10 +80,12 @@ def get_challenge(username):
 		_cursor.execute(
 			"""INSERT INTO sessions(id, challenge, user_id, authorized) VALUES (%s,%s,%s, True)""",
 		(session_id, challenge, user_id))
+		_database.commit()
 	except Exception:
 		return {"status": "failed"}
-	return {"status": "success",
-	        "session_id": _bin2uni(session_id),
+	else:
+		return {"status": "success",
+		        "session_id": _bin2uni(session_id),
 	        "salt": _bin2uni(salt),
 	        "challenge": _bin2uni(challenge)}
 
