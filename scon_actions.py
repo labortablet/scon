@@ -63,7 +63,7 @@ def _get_userid_and_salt(username):
 		m.update(username.encode("utf-8"))
 		m.update(SERVER_STABLE_RANDOM.encode("utf-8"))
 		salt = m.digest()
-		return "null", salt
+		return None, salt
 
 
 def test(**kwargs):
