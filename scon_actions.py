@@ -105,7 +105,7 @@ def get_projects(session_id):
 	ON sessions.user_id = users_projects_view.user_id
 	WHERE sessions.authorized = True AND sessions.id = %s""", session_id.bytes)
 	projects = _cursor.fetchall()
-	return {"status": "success", "projects": projects}
+	return {"status": "success", "projects": len(projects)}
 
 
 def get_experiments(session_id):
