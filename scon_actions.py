@@ -66,7 +66,7 @@ def _get_userid_and_salt(username):
 		return None, salt
 
 
-def test(**kwargs):
+def echo(**kwargs):
 	return kwargs
 
 
@@ -97,7 +97,6 @@ def auth_session(session_id, response):
 
 def get_projects(session_id):
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
-	#FIXME tipo but it is still in the database
 	_cursor.execute("""SELECT
 	users_projects_view.project_id,
 	users_projects_view.project_name,
@@ -112,19 +111,13 @@ def get_projects(session_id):
 
 def get_experiments(session_id):
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
-	#FIXME we most likely want to use a view here.
-	_cursor.execute("""SELECT projects.id, experiments.id, experiments.name, experiments.description
-	FROM `experiments`
-	INNER JOIN `projects`
-	ON projects.id = experiments.project_id
-	INNER JOIN `projects_groups`
-	ON projects_groups.project_id = projects.id
-	INNER JOIN `users_groups`
-	ON users_groups.group_id = projects_groups.group_id
-	INNER JOIN `users`
-	ON users_groups.user_id = users.id
+	_cursor.execute("""SELECT
+	users_experiments_view.experiment_id,
+	users_experiments_view.experiment_name,
+	users_experiments_view.experiment_description
+	FROM `users_experiments_view`
 	INNER JOIN `sessions`
-	ON sessions.user_id = users.id
+	ON users_experiments_view.user_id = sessions.user_id
 	WHERE sessions.authorized = True AND sessions.id = %s""", session_id.bytes)
 	experiments = _cursor.fetchall()
 	return {"status": "success", "experiments": experiments}
