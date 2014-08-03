@@ -19,10 +19,6 @@ import pymysql
 
 cgitb.enable()
 
-#FIXME needs to be stable over a long time
-SERVER_STABLE_RANDOM = u"sadsdasdassadsd"
-
-
 class LabletBaseException(Exception):
 	pass
 
@@ -39,7 +35,7 @@ def _bin2uni(bin):
 
 _config = configparser.ConfigParser()
 _config.read_file(open("/home/lablet/.my.cnf"))
-
+_SERVER_STABLE_RANDOM = _config.get('client', 'password')
 _database = pymysql.connect(unix_socket=_config.get('client', 'socket'),
                             port=_config.get('client', 'port'),
                             user=_config.get('client', 'user'),
@@ -61,7 +57,7 @@ def _get_userid_and_salt(username):
 	else:
 		m = hashlib.md5()
 		m.update(username.encode("utf-8"))
-		m.update(SERVER_STABLE_RANDOM.encode("utf-8"))
+		m.update(_SERVER_STABLE_RANDOM.encode("utf-8"))
 		salt = m.digest()
 		return None, salt
 
