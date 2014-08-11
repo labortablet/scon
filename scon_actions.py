@@ -7,6 +7,7 @@ __version__ = ""
 __maintainer__ = "Frederik Lauber"
 __status__ = "Development"
 __contact__ = "https://flambda.de/impressum.html"
+# FIXME document which modules need to be installed for this
 
 import uuid
 import configparser
@@ -14,6 +15,7 @@ import hashlib
 import base64
 import cgitb
 
+import bcrypt
 import pymysql
 
 
@@ -70,11 +72,9 @@ def get_challenge(username):
 	session_id = uuid.uuid4().bytes
 	challenge = uuid.uuid4().bytes
 	(user_id, salt) = _get_userid_and_salt(username)
-	#FIXME right now all sessions are authorized!!!!!
-	#I cannot implement authorisation as the database is still missing the needed fields
 	try:
 		_cursor.execute(
-			"""INSERT INTO sessions(id, challenge, user_id, authorized) VALUES (%s,%s,%s, True)""",
+			"""INSERT INTO sessions(id, challenge, user_id) VALUES (%s,%s,%s)""",
 		(session_id, challenge, user_id))
 		_database.commit()
 	except Exception:
@@ -87,8 +87,41 @@ def get_challenge(username):
 
 
 def auth_session(session_id, response):
-	#FIXME not yet implemented as database is not far enought yet
-	return {"status": "success"}
+	session_id = uuid.UUID(bytes=_uni2bin(session_id))
+	_cursor.execute("""SELECT
+	users.hash_password,
+	sessions.challenge
+	FROM `users`
+	INNER JOIN `sessions`
+	ON sessions.user_id = user.id
+	WHERE sessions.id = %s""", session_id.bytes)
+	(hash_password, challenge) = _cursor.fetchall()[0]
+	if response == bcrypt.hashpw(hash_password, challenge):
+		try:
+			_cursor.execute("""UPDATE sessions SET authorized = True WHERE session_id = %s""", session_id)
+			_database.commit()
+		except Exception:
+			return {"status": "failed"}
+		else:
+			return {"status": "success"}
+	else:
+		return {"status": "failed"}
+
+
+def get_user(session_id):
+	session_id = uuid.UUID(bytes=_uni2bin(session_id))
+	_cursor.execute("""SELECT
+	lastname,
+	firstname,
+	profil_image,
+	create_date,
+	email
+	FROM `users`
+	INNER JOIN `sessions`
+	ON sessions.user_id = user.id
+	WHERE sessions.authorized = True AND sessions.id = %s""", session_id.bytes)
+	user_info = _cursor.fetchall()[0]
+	return {"status": "success", "user": user_info}
 
 
 def get_projects(session_id):
@@ -120,26 +153,40 @@ def get_experiments(session_id):
 
 
 def get_last_entry_ids(session_id, experiment_id, entry_count):
+	experiment_id = int(experiment_id)
+	entry_count = int(entry_count)
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
-	#FIXME we most likely want to use a view here.
-	_cursor.execute("""SELECT id
-	FROM `entries`
-	INNER JOIN `experiments`
-	ON experiments.id = entries.expr_id
-	INNER JOIN `projects`
-	ON projects.id = experiments.project_id
-	INNER JOIN `projects_groups`
-	ON projects_groups.project_id = projects.id
-	INNER JOIN `users_groups`
-	ON users_groups.group_id = projects_groups.group_id
-	INNER JOIN `users`
-	ON users_groups.user_id = users.id
-	INNER JOIN `sessions`
-	ON sessions.user_id = users.id
-	WHERE sessions.authorized = True AND sessions.id = %s""", session_id.bytes)
+	_cursor.execute("""SELECT
+	entry_id
+	FROM `users_groups_entries_view`
+	WHERE users_groups_entries_view.experiment_id = %s AND group_id IN
+	(SELECT DISTINCT group_id
+	FROM users_groups WHERE user_id IN
+	(SELECT user_id
+	FROM sessions
+	WHERE
+	sessions.authorized = True AND sessions.id = %s))
+	ORDERED BY users_groups_entries_view.entry_date, users_groups_entries_view.entry_user_date
+	LIMIT 0, %s""", experiment_id, session_id.bytes, entry_count)
 	entry_ids = _cursor.fetchall()
 	return {"status": "success", "entry_ids": entry_ids}
 
 
 def get_entry(session_id, entry_id):
-	return {"status": "success"}
+	entry_count = int(entry_id)
+	session_id = uuid.UUID(bytes=_uni2bin(session_id))
+	_cursor.execute("""SELECT
+	entry_id,
+	entry_title,
+	entry_attachment,
+	entry_attachment_type
+	FROM `users_groups_entries_view`
+	INNER JOIN `sessions`
+	ON sessions.user_id = users_groups_entries_view.users_id
+	WHERE sessions.authorized = True AND sessions.id = %s AND users_groups_entries_view = %s""",
+	                session_id.bytes, entry_count)
+	entry_list = _cursor.fetchall()
+	if len(entry_list) > 1:
+		raise Exception("Entry id not unique")
+	entry = entry_list[0]
+	return {"status": "success", "entry": entry}
