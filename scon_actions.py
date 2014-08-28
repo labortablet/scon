@@ -20,6 +20,11 @@ import pymysql
 
 cgitb.enable()
 
+_SERVER_STABLE_RANDOM = None
+_database = None
+_cursor = None
+
+
 class LabletBaseException(Exception):
 	pass
 
@@ -34,20 +39,27 @@ def _bin2uni(bin):
 	return base64.b64encode(bin).decode("ascii")
 
 
-_config = configparser.ConfigParser()
-_config.read_file(open("/home/lablet/.my.cnf"))
-_SERVER_STABLE_RANDOM = _config.get('client', 'password')
-_database = pymysql.connect(unix_socket=_config.get('client', 'socket'),
+def _enable_db(func):
+	_config = configparser.ConfigParser()
+	_config.read_file(open("/home/lablet/.my.cnf"))
+	_SERVER_STABLE_RANDOM = _config.get('client', 'password')
+	_database = pymysql.connect(unix_socket=_config.get('client', 'socket'),
                             port=_config.get('client', 'port'),
                             user=_config.get('client', 'user'),
                             passwd=_config.get('client', 'password'),
                             db="lablet_tabletprojectdb",
                             charset='utf8')
+	del _config
+	_cursor = _database.cursor()
 
-del _config
-_cursor = _database.cursor()
+	def do_nothing(func):
+		return func
+
+	_enable_db = do_nothing
+	return func
 
 
+@_enable_db
 def _get_userid_and_salt(username):
 	_cursor.execute("""SELECT id, salt FROM `users` WHERE email = %s""", username)
 	user_list = _cursor.fetchall()
@@ -67,6 +79,7 @@ def echo(**kwargs):
 	return kwargs
 
 
+@_enable_db
 def get_challenge(username):
 	session_id = uuid.uuid4().bytes
 	challenge = uuid.uuid4().bytes
@@ -85,6 +98,7 @@ def get_challenge(username):
 	        "challenge": _bin2uni(challenge)}
 
 
+@_enable_db
 def auth_session(session_id, response):
 	return {"status": "success"}
 # session_id = uuid.UUID(bytes=_uni2bin(session_id))
@@ -108,6 +122,7 @@ def auth_session(session_id, response):
 #	return {"status": "failed"}
 
 
+@_enable_db
 def get_user(session_id):
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
 	_cursor.execute("""SELECT
@@ -124,6 +139,7 @@ def get_user(session_id):
 	return {"status": "success", "user": user_info}
 
 
+@_enable_db
 def get_projects(session_id):
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
 	_cursor.execute("""SELECT
@@ -138,6 +154,7 @@ def get_projects(session_id):
 	return {"status": "success", "projects": projects}
 
 
+@_enable_db
 def get_experiments(session_id):
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
 	_cursor.execute("""SELECT
@@ -152,6 +169,7 @@ def get_experiments(session_id):
 	return {"status": "success", "experiments": experiments}
 
 
+@_enable_db
 def get_last_entry_ids(session_id, experiment_id, entry_count):
 	experiment_id = int(experiment_id)
 	entry_count = int(entry_count)
@@ -172,6 +190,7 @@ def get_last_entry_ids(session_id, experiment_id, entry_count):
 	return {"status": "success", "entry_ids": entry_ids}
 
 
+@_enable_db
 def get_entry(session_id, entry_id):
 	entry_count = int(entry_id)
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
