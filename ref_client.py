@@ -18,10 +18,6 @@ def auth_session(session_id, response):
 	return {"status": "success"}
 
 
-def get_project_ids(session_id):
-	return {"status": "success"}
-
-
 def get_last_entry_ids(session_id, entry_count):
 	return {"status": "success"}
 
@@ -62,7 +58,8 @@ def get_experiments(session_id):
 
 
 def get_last_entry_ids(session_id, experiment_id, entry_count):
-	data = {"action": "get_last_entry_ids", "experiment_id": experiment_id, "session_id": session_id}
+	data = {"action": "get_last_entry_ids", "experiment_id": experiment_id, "session_id": session_id,
+	        "entry_count": entry_count}
 	return _prepare_data_and_response(data)
 
 
@@ -79,3 +76,6 @@ print(projects)
 experiments = get_experiments(session_id)
 print("Experiments")
 print(experiments)
+experiments = experiments["experiments"]
+experiment = experiments[0]
+print(get_last_entry_ids(session_id, 1, 20))
