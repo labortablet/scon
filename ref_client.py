@@ -47,6 +47,10 @@ def get_challenge(username):
 	return _prepare_data_and_response(data)
 
 
+def get_version():
+	data = {"action": "version"}
+	return _prepare_data_and_response(data)
+
 def get_projects(session_id):
 	data = {"action": "get_projects", "session_id": session_id}
 	return _prepare_data_and_response(data)
@@ -62,6 +66,7 @@ def get_last_entry_ids(session_id, experiment_id, entry_count):
 	return _prepare_data_and_response(data)
 
 
+print(get_version())
 tmp = get_challenge("fredi@uni-siegen.de")
 print(tmp)
 challenge = tmp["challenge"]

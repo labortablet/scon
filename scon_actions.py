@@ -77,6 +77,10 @@ def echo(**kwargs):
 	return kwargs
 
 
+def version(**kwargs):
+	return {"status": "success", "version": "0.2"}
+
+
 @_enable_db
 def get_challenge(username):
 	session_id = uuid.uuid4().bytes
