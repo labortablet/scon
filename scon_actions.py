@@ -187,7 +187,7 @@ def get_last_entry_ids(session_id, experiment_id, entry_count):
 	WHERE
 	sessions.authorized = True AND sessions.id = %s))
 	ORDERED BY users_groups_entries_view.entry_date, users_groups_entries_view.entry_user_date
-	LIMIT 0, %s""", experiment_id, session_id.bytes, entry_count)
+	LIMIT 0, %s""", (experiment_id, session_id.bytes, entry_count))
 	entry_ids = _cursor.fetchall()
 	return {"status": "success", "entry_ids": entry_ids}
 
@@ -205,7 +205,7 @@ def get_entry(session_id, entry_id):
 	INNER JOIN `sessions`
 	ON sessions.user_id = users_groups_entries_view.users_id
 	WHERE sessions.authorized = True AND sessions.id = %s AND users_groups_entries_view = %s""",
-	                session_id.bytes, entry_count)
+	                (session_id.bytes, entry_count))
 	entry_list = _cursor.fetchall()
 	if len(entry_list) > 1:
 		raise Exception("Entry id not unique")
