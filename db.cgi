@@ -61,6 +61,7 @@ except Exception as E:
 	print("Content-Type: text/html\n\n")
 	print("<html><body>")
 	print("<p>Exception happened!</p><p>{0}</p>".format(E))
+	print("<p>" + str(arguments) + "</p>")
 	print("</body></html>")
 	sys.exit()
 
