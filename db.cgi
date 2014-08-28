@@ -59,10 +59,7 @@ try:
 #action_dict[action](**arguments)
 except Exception as E:
 	print("Content-Type: text/html\n\n")
-	print("<html><body><p>Exception happened!</p>")
-	print(<p>{0}</p>".format(E))
-	print("<p>Arguments:</p>")
-	print("</body></html>")
+	print("<html><body><p>Exception happened!</p><p>{0}</p></body></html>".format(E))
 	sys.exit()
 
 sys.stdout.buffer.write('Content-Type: application/json\n\n'.encode('utf-8'))
