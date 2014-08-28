@@ -188,7 +188,8 @@ def get_last_entry_ids(session_id, experiment_id, entry_count):
 	sessions.authorized = True AND sessions.id = %s))
 	ORDER BY users_groups_entries_view.entry_date, users_groups_entries_view.entry_date_user DESC LIMIT %s""",
 	                (experiment_id, session_id.bytes, entry_count))
-	entry_ids = _cursor.fetchall()
+	# get and flatten
+	entry_ids = (i[0] for i in _cursor.fetchall())
 	return {"status": "success", "entry_ids": entry_ids}
 
 
