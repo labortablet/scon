@@ -186,7 +186,7 @@ def get_last_entry_ids(session_id, experiment_id, entry_count):
 	FROM sessions
 	WHERE
 	sessions.authorized = True AND sessions.id = %s))
-	ORDERED BY users_groups_entries_view.entry_date, users_groups_entries_view.entry_user_date
+	ORDERED BY users_groups_entries_view.entry_date DESC
 	LIMIT 0, %s""", (experiment_id, session_id.bytes, entry_count))
 	entry_ids = _cursor.fetchall()
 	return {"status": "success", "entry_ids": entry_ids}
