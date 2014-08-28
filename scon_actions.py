@@ -20,11 +20,6 @@ import pymysql
 
 cgitb.enable()
 
-_SERVER_STABLE_RANDOM = None
-_database = None
-_cursor = None
-
-
 class LabletBaseException(Exception):
 	pass
 
@@ -40,6 +35,9 @@ def _bin2uni(bin):
 
 
 def _enable_db(func):
+	global _SERVER_STABLE_RANDOM
+	global _database
+	global _cursor
 	_config = configparser.ConfigParser()
 	_config.read_file(open("/home/lablet/.my.cnf"))
 	_SERVER_STABLE_RANDOM = _config.get('client', 'password')
