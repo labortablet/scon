@@ -62,7 +62,6 @@ except Exception as E:
 	print("<html><body>")
 	print("<p>Exception happened!</p><p>{0}</p>".format(E))
 	print("<p>" + str(arguments) + "</p>")
-	print("<p> + str(sys.exc_info()[0]) + "</p>")
 	print("</body></html>")
 	sys.exit()
 
