@@ -205,7 +205,6 @@ def get_entry(session_id, entry_id):
 	group_description,
 	project_id,
 	experiment_id,
-	entry_id,
 	entry_title,
 	entry_date,
 	entry_date_user,
@@ -223,4 +222,28 @@ def get_entry(session_id, entry_id):
 	if len(entry_list) > 1:
 		raise Exception("Entry id not unique")
 	entry = entry_list[0]
-	return {"status": "success", "entry": entry}
+	(user_firstname,
+	 user_lastname,
+	 user_email,
+	 group_name,
+	 group_description,
+	 project_id,
+	 experiment_id,
+	 entry_title,
+	 entry_date,
+	 entry_date_user,
+	 entry_attachment,
+	 entry_attachment_type) = entry_list[0]
+	return {"status": "success",
+	        "user_firstname": user_firstname,
+	        "user_lastname": user_lastname,
+	        "user_email": user_email,
+	        "group_name": group_name,
+	        "group_description": group_description,
+	        "project_id": project_id,
+	        "experiment_id": experiment_id,
+	        "entry_title": entry_title,
+	        "entry_date": entry_date,
+	        "entry_date_user": entry_date_user,
+	        "entry_attachment": entry_attachment,
+	        "entry_attachment_type": entry_attachment_type}
