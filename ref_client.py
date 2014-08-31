@@ -23,7 +23,8 @@ def get_last_entry_ids(session_id, entry_count):
 
 
 def get_entry(session_id, entry_id):
-	return {"status": "success"}
+	data = {"action": "get_entry", "session_id": session_id, "entry_id": entry_id}
+	return _prepare_data_and_response(data)
 
 
 def _prepare_data_and_response(data):
@@ -78,4 +79,9 @@ print("Experiments")
 print(experiments)
 experiments = experiments["experiments"]
 experiment = experiments[0]
-print(get_last_entry_ids(session_id, 1, 20))
+print("Hallo")
+print(experiment)
+k = get_last_entry_ids(session_id, experiment[0], 20)
+k = k["entry_ids"]
+print(k)
+print(get_entry(session_id, k[0]))

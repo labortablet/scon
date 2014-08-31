@@ -195,18 +195,30 @@ def get_last_entry_ids(session_id, experiment_id, entry_count):
 
 @_enable_db
 def get_entry(session_id, entry_id):
-	entry_count = int(entry_id)
+	entry_id = int(entry_id)
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
 	_cursor.execute("""SELECT
+	user_firstname,
+	user_lastname,
+	user_email,
+	group_name,
+	group_description,
+	project_id,
+	experiment_id,
 	entry_id,
 	entry_title,
+	entry_date,
+	entry_date_user,
 	entry_attachment,
 	entry_attachment_type
 	FROM `users_groups_entries_view`
-	INNER JOIN `sessions`
-	ON sessions.user_id = users_groups_entries_view.users_id
-	WHERE sessions.authorized = True AND sessions.id = %s AND users_groups_entries_view = %s""",
-	                (session_id.bytes, entry_count))
+	WHERE users_groups_entries_view.entry_id = %s AND group_id IN
+	(SELECT DISTINCT group_id
+	FROM users_groups WHERE user_id IN
+	(SELECT user_id
+	FROM sessions
+	WHERE
+	sessions.authorized = True AND sessions.id = %s))""", (entry_id, session_id.bytes))
 	entry_list = _cursor.fetchall()
 	if len(entry_list) > 1:
 		raise Exception("Entry id not unique")
