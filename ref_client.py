@@ -10,6 +10,7 @@ import json
 import hashlib
 import urllib.request
 
+from scon_actions import _uni2bin
 import bcrypt
 
 
@@ -80,7 +81,7 @@ print("Challenge: " + challenge)
 print("Session_id: " + session_id)
 print("Salt: " + salt)
 print("Auth session")
-print(auth_session(session_id, "test", salt, challenge))
+print(auth_session(session_id, "test", _uni2bin(salt), _uni2bin(challenge)))
 projects = get_projects(session_id)
 print("Projects:")
 print(projects)
