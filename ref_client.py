@@ -7,16 +7,21 @@ __status__ = "Development"
 __contact__ = "https://flambda.de/impressum.html"
 
 import json
-
+import hashlib
 import urllib.request
+
+import bcrypt
+
 
 url = 'https://lablet.vega.uberspace.de/scon/db.cgi'
 #url = 'https://lablet.vega.uberspace.de/scon/db_ustest.cgi'
 #url = 'https://lablet.vega.uberspace.de/scon/json_bounce.cgi'
 
-def auth_session(session_id, response):
-	return {"status": "success"}
-
+def auth_session(session_id, pw, salt, challenge):
+	hash_pw = hashlib.sha256(pw)
+	salted_pw = bcrypt.hashpw(hash_pw, salt)
+	response = bcrypt.hashpw(hash_pw, challenge)
+	return {"action": "auth_session", "session_id": session_id, "response": response}
 
 def get_last_entry_ids(session_id, entry_count):
 	return {"status": "success"}
