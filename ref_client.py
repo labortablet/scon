@@ -21,7 +21,7 @@ url = 'https://lablet.vega.uberspace.de/scon/db.cgi'
 def auth_session(session_id, pw, salt, challenge):
 	hash_pw = hashlib.sha256(pw).digest()
 	print(hash_pw)
-	print(salt.size)
+	print(len(salt))
 	salted_pw = bcrypt.hashpw(hash_pw, salt)
 	response = bcrypt.hashpw(hash_pw, challenge)
 	data = {"action": "auth_session", "session_id": session_id, "response": response}
