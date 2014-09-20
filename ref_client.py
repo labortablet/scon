@@ -20,6 +20,8 @@ url = 'https://lablet.vega.uberspace.de/scon/db.cgi'
 
 def auth_session(session_id, pw, salt, challenge):
 	hash_pw = hashlib.sha256(pw).digest()
+	print(hash_pw)
+	print(salt.size)
 	salted_pw = bcrypt.hashpw(hash_pw, salt)
 	response = bcrypt.hashpw(hash_pw, challenge)
 	data = {"action": "auth_session", "session_id": session_id, "response": response}
@@ -74,9 +76,9 @@ def get_last_entry_ids(session_id, experiment_id, entry_count):
 print(get_version())
 tmp = get_challenge("fredi@uni-siegen.de")
 print(tmp)
-challenge = tmp["challenge"][:22]
+challenge = tmp["challenge"]
 session_id = tmp["session_id"]
-salt = tmp["salt"][:22]
+salt = tmp["salt"]
 print("Challenge: " + challenge)
 print("Session_id: " + session_id)
 print("Salt: " + salt)
