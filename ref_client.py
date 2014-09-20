@@ -19,7 +19,7 @@ url = 'https://lablet.vega.uberspace.de/scon/db.cgi'
 #url = 'https://lablet.vega.uberspace.de/scon/json_bounce.cgi'
 
 def auth_session(session_id, pw, salt, challenge):
-	hash_pw = hashlib.sha256(pw)
+	hash_pw = hashlib.sha256(pw).digest()
 	salted_pw = bcrypt.hashpw(hash_pw, salt)
 	response = bcrypt.hashpw(hash_pw, challenge)
 	data = {"action": "auth_session", "session_id": session_id, "response": response}
