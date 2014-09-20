@@ -21,7 +21,8 @@ def auth_session(session_id, pw, salt, challenge):
 	hash_pw = hashlib.sha256(pw)
 	salted_pw = bcrypt.hashpw(hash_pw, salt)
 	response = bcrypt.hashpw(hash_pw, challenge)
-	return {"action": "auth_session", "session_id": session_id, "response": response}
+	data = {"action": "auth_session", "session_id": session_id, "response": response}
+	return _prepare_data_and_response(data)
 
 def get_last_entry_ids(session_id, entry_count):
 	return {"status": "success"}
@@ -74,8 +75,12 @@ tmp = get_challenge("fredi@uni-siegen.de")
 print(tmp)
 challenge = tmp["challenge"]
 session_id = tmp["session_id"]
+salt = tmp["salt"]
 print("Challenge: " + challenge)
 print("Session_id: " + session_id)
+print("Salt: " + salt)
+print("Auth session")
+print(auth_session(session_id, "test", salt, challenge))
 projects = get_projects(session_id)
 print("Projects:")
 print(projects)
