@@ -11,6 +11,7 @@ import hashlib
 import urllib.request
 
 import bcrypt
+from scon_actions import _uni2bin
 
 
 url = 'https://lablet.vega.uberspace.de/scon/db.cgi'
@@ -18,8 +19,8 @@ url = 'https://lablet.vega.uberspace.de/scon/db.cgi'
 #url = 'https://lablet.vega.uberspace.de/scon/json_bounce.cgi'
 
 def auth_session(session_id, pw, salt, challenge):
-	salt = "$2y$10$".encode("ascii") + salt
-	challenge = "$2y$10$".encode("ascii") + challenge
+	salt = "$2y$10$".encode("ascii") + _uni2bin(salt)
+	challenge = "$2y$10$".encode("ascii") + _uni2bin(challenge)
 	hash_pw = hashlib.sha256(pw).digest()
 	salted_pw = bcrypt.hashpw(hash_pw, salt)
 	response = bcrypt.hashpw(salted_pw, challenge)
@@ -75,8 +76,8 @@ def get_last_entry_ids(session_id, experiment_id, entry_count):
 print(get_version())
 tmp = get_challenge("fredi@uni-siegen.de")
 print(tmp)
-salt = tmp["salt"][:22]
-challenge = tmp["challenge"][:22]
+salt = tmp["salt"]
+challenge = tmp["challenge"]
 session_id = tmp["session_id"]
 print("Challenge: " + challenge)
 print("Session_id: " + session_id)
