@@ -11,7 +11,7 @@ import hashlib
 import urllib.request
 
 import bcrypt
-from scon_actions import _uni2bin
+from scon_actions import _uni2bin, _bin2uni
 
 
 url = 'https://lablet.vega.uberspace.de/scon/db.cgi'
