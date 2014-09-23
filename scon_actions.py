@@ -112,7 +112,7 @@ def auth_session(session_id, response):
 #ON sessions.user_id = user.id
 #WHERE sessions.id = %s""", session_id.bytes)
 #(hash_password, challenge) = _cursor.fetchall()[0]
-#if response == bcrypt.hashpw(hash_password, challenge):
+# if response == bcrypt.hashpw(hash_password, "$2y$10$" + challenge):
 #	try:
 #		_cursor.execute("""UPDATE sessions SET authorized = True WHERE session_id = %s""", session_id)
 #		_database.commit()
