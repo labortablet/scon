@@ -19,8 +19,8 @@ url = 'https://lablet.vega.uberspace.de/scon/db.cgi'
 #url = 'https://lablet.vega.uberspace.de/scon/json_bounce.cgi'
 
 def auth_session(session_id, pw, salt, challenge):
-	salt = b"$2y$10$" + _uni2bin(salt)
-	challenge = b"$2y$10$" + _uni2bin(challenge)
+	salt = bcrypt.gensalt(10, _uni2bin(salt))  # modified the bcrypt file to allow my own random bytes
+	challenge = bcrypt.gensalt(10, _uni2bin(challenge))  #modified the bcrypt file to allow my own random bytes
 	hash_pw = hashlib.sha256(pw).digest()
 	salted_pw = bcrypt.hashpw(hash_pw, salt)
 	response = bcrypt.hashpw(salted_pw, challenge)
