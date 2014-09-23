@@ -24,7 +24,7 @@ def auth_session(session_id, pw, salt, challenge):
 	hash_pw = hashlib.sha256(pw).digest()
 	salted_pw = bcrypt.hashpw(hash_pw, salt)
 	response = bcrypt.hashpw(salted_pw, challenge)
-	data = {"action": "auth_session", "session_id": session_id, "response": response}
+	data = {"action": "auth_session", "session_id": session_id, "response": _bin2uni(response)}
 	return _prepare_data_and_response(data)
 
 def get_last_entry_ids(session_id, entry_count):
