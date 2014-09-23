@@ -18,13 +18,11 @@ url = 'https://lablet.vega.uberspace.de/scon/db.cgi'
 #url = 'https://lablet.vega.uberspace.de/scon/json_bounce.cgi'
 
 def auth_session(session_id, pw, salt, challenge):
+	salt = "$2y$10$".encode("ascii") + salt
+	challenge = "$2y$10$".encode("ascii") + challenge
 	hash_pw = hashlib.sha256(pw).digest()
-	print(type(hash_pw))
-	salt = "$2y$10$" + salt
-	print(type(salt))
-	print(type(bcrypt.gensalt()))
 	salted_pw = bcrypt.hashpw(hash_pw, salt)
-	response = bcrypt.hashpw(salted_pw, "$2y$10$" + challenge)
+	response = bcrypt.hashpw(salted_pw, challenge)
 	data = {"action": "auth_session", "session_id": session_id, "response": response}
 	return _prepare_data_and_response(data)
 
