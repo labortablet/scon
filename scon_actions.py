@@ -102,26 +102,25 @@ def get_challenge(username):
 
 @_enable_db
 def auth_session(session_id, response):
-	return {"status": "success"}
-# session_id = uuid.UUID(bytes=_uni2bin(session_id))
-#_cursor.execute("""SELECT
-#users.hash_password,
-#sessions.challenge
-#FROM `users`
-#INNER JOIN `sessions`
-#ON sessions.user_id = user.id
-#WHERE sessions.id = %s""", session_id.bytes)
-#(hash_password, challenge) = _cursor.fetchall()[0]
-# if response == bcrypt.hashpw(hash_password, "$2y$10$" + challenge):
-#	try:
-#		_cursor.execute("""UPDATE sessions SET authorized = True WHERE session_id = %s""", session_id)
-#		_database.commit()
-#	except Exception:
-#		return {"status": "failed"}
-#	else:
-#		return {"status": "success"}
-#else:
-#	return {"status": "failed"}
+	session_id = uuid.UUID(bytes=_uni2bin(session_id))
+	_cursor.execute("""SELECT
+	users.hash_password,
+	sessions.challenge
+	FROM `users`
+	INNER JOIN `sessions`
+	ON sessions.user_id = user.id
+	WHERE sessions.id = %s""", session_id.bytes)
+	(hash_password, challenge) = _cursor.fetchall()[0]
+	if response == bcrypt.hashpw(hash_password, bcrypt.gensalt(10, _uni2bin(challenge))):
+		try:
+			_cursor.execute("""UPDATE sessions SET authorized = True WHERE session_id = %s""", session_id)
+			_database.commit()
+		except Exception:
+			return {"status": "failed"}
+		else:
+			return {"status": "success"}
+	else:
+		return {"status": "failed"}
 
 
 @_enable_db
