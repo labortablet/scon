@@ -22,6 +22,7 @@ def auth_session(session_id, pw, salt, challenge):
 	print(type(hash_pw))
 	salt = "$2y$10$" + salt
 	print(type(salt))
+	print(type(bcrypt.gensalt()))
 	salted_pw = bcrypt.hashpw(hash_pw, salt)
 	response = bcrypt.hashpw(salted_pw, "$2y$10$" + challenge)
 	data = {"action": "auth_session", "session_id": session_id, "response": response}
