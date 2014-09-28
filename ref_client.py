@@ -44,8 +44,6 @@ def _prepare_data_and_response(data):
 	req = urllib.request.Request(url, post_data, headers)
 	response = urllib.request.urlopen(req)
 	response_read_and_decoded = response.read().decode("utf8")
-	print(data)
-	print(response_read_and_decoded)
 	return json.loads(response_read_and_decoded)
 
 
@@ -74,9 +72,10 @@ def get_last_entry_ids(session_id, experiment_id, entry_count):
 	return _prepare_data_and_response(data)
 
 
+print("Version:")
 print(get_version())
 tmp = get_challenge("fredi@uni-siegen.de")
-print(tmp)
+print("Challenge:")
 salt = tmp["salt"]
 challenge = tmp["challenge"]
 session_id = tmp["session_id"]
@@ -84,17 +83,17 @@ print("Challenge: " + challenge)
 print("Session_id: " + session_id)
 print("Auth session")
 print(auth_session(session_id, "test".encode("utf-8"), salt, challenge))
-projects = get_projects(session_id)
-print("Projects:")
-print(projects)
-experiments = get_experiments(session_id)
-print("Experiments")
-print(experiments)
-experiments = experiments["experiments"]
-experiment = experiments[0]
-print("Hallo")
-print(experiment)
-k = get_last_entry_ids(session_id, experiment[0], 20)
-k = k["entry_ids"]
-print(k)
-print(get_entry(session_id, k[0]))
+# projects = get_projects(session_id)
+#print("Projects:")
+#print(projects)
+#experiments = get_experiments(session_id)
+#print("Experiments")
+#print(experiments)
+#experiments = experiments["experiments"]
+#experiment = experiments[0]
+#print("Hallo")
+#print(experiment)
+#k = get_last_entry_ids(session_id, experiment[0], 20)
+#k = k["entry_ids"]
+#print(k)
+#print(get_entry(session_id, k[0]))
