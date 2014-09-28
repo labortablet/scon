@@ -89,7 +89,7 @@ def get_challenge(username):
 	(user_id, salt) = _get_userid_and_salt(username)
 	try:
 		_cursor.execute(
-			"""INSERT INTO sessions(id, challenge, user_id, authorized) VALUES (%s,%s,%s, True)""",
+			"""INSERT INTO sessions(id, challenge, user_id) VALUES (%s,%s,%s)""",
 			(session_id, challenge, user_id))
 		_database.commit()
 	except Exception:
