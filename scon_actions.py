@@ -103,6 +103,7 @@ def get_challenge(username):
 
 @_enable_db
 def auth_session(session_id, response):
+	print(type(response))
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
 	_cursor.execute("""SELECT
 	users.hash_password,
