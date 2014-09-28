@@ -121,7 +121,7 @@ def auth_session(session_id, response):
 		else:
 			return {"status": "success"}
 	else:
-		return {"status": "failed", "status2": "response_failed"}
+		return {"status": "failed", "status2": "response_failed", "challenge": challenge, "response": response}
 
 
 @_enable_db
