@@ -112,7 +112,7 @@ def auth_session(session_id, response):
 	ON sessions.user_id = users.id
 	WHERE sessions.id = %s""", session_id.bytes)
 	(hash_password, challenge) = _cursor.fetchall()[0]
-	calc = bcrypt.hashpw(hash_password, bcrypt.gensalt(10, _uni2bin(challenge)))
+	calc = bcrypt.hashpw(hash_password, bcrypt.gensalt(10, _uni2bin(challenge.decode("utf-8"))))
 	# if response == :
 	#	try:
 	#		_cursor.execute("""UPDATE sessions SET authorized = True WHERE session_id = %s""", session_id)
