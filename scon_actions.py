@@ -16,7 +16,6 @@ import base64
 import cgitb
 
 import pymysql
-import bcrypt
 
 
 cgitb.enable()
@@ -103,7 +102,6 @@ def get_challenge(username):
 
 @_enable_db
 def auth_session(session_id, response):
-	print(type(response))
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
 	_cursor.execute("""SELECT
 	users.hash_password,
@@ -112,17 +110,17 @@ def auth_session(session_id, response):
 	INNER JOIN `sessions`
 	ON sessions.user_id = users.id
 	WHERE sessions.id = %s""", session_id.bytes)
-	(hash_password, challenge) = _cursor.fetchall()[0]
-	if response == bcrypt.hashpw(hash_password, bcrypt.gensalt(10, _uni2bin(challenge))):
-		try:
-			_cursor.execute("""UPDATE sessions SET authorized = True WHERE session_id = %s""", session_id)
-			_database.commit()
-		except Exception:
-			return {"status": "failed"}
-		else:
-			return {"status": "success"}
-	else:
-		return {"status": "failed"}
+	# (hash_password, challenge) = _cursor.fetchall()[0]
+	#if response == bcrypt.hashpw(hash_password, bcrypt.gensalt(10, _uni2bin(challenge))):
+	#	try:
+	#		_cursor.execute("""UPDATE sessions SET authorized = True WHERE session_id = %s""", session_id)
+	#		_database.commit()
+	#	except Exception:
+	#		return {"status": "failed"}
+	#	else:
+	#		return {"status": "success"}
+	#else:
+	return {"status": "failed"}
 
 
 @_enable_db
