@@ -108,7 +108,7 @@ def auth_session(session_id, response):
 	sessions.challenge
 	FROM `users`
 	INNER JOIN `sessions`
-	ON sessions.user_id = user.id
+	ON sessions.user_id = users.id
 	WHERE sessions.id = %s""", session_id.bytes)
 	(hash_password, challenge) = _cursor.fetchall()[0]
 	if response == bcrypt.hashpw(hash_password, bcrypt.gensalt(10, _uni2bin(challenge))):
