@@ -44,6 +44,7 @@ def _prepare_data_and_response(data):
 	req = urllib.request.Request(url, post_data, headers)
 	response = urllib.request.urlopen(req)
 	response_read_and_decoded = response.read().decode("utf8")
+	print(data)
 	print(response_read_and_decoded)
 	return json.loads(response_read_and_decoded)
 
