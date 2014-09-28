@@ -14,6 +14,10 @@ import bcrypt
 from scon_actions import _uni2bin, _bin2uni
 
 
+pw_db = "test"
+value_db = "$2y$10$wbBPkWPW3dPqgLNR4GlvGeTqf2pWenxSz5pROlX/VMjmz6h1ye/.a"
+salt_db = "wbBPkWPW3dPqgLNR4GlvGg"
+
 url = 'https://lablet.vega.uberspace.de/scon/db.cgi'
 #url = 'https://lablet.vega.uberspace.de/scon/db_ustest.cgi'
 #url = 'https://lablet.vega.uberspace.de/scon/json_bounce.cgi'
@@ -81,8 +85,10 @@ challenge = tmp["challenge"]
 session_id = tmp["session_id"]
 print("Challenge: " + challenge)
 print("Session_id: " + session_id)
+print(salt)
+print(salt_db)
 print("Auth session")
-print(auth_session(session_id, "test".encode("utf-8"), salt, challenge))
+print(auth_session(session_id, pw.encode("utf-8"), salt, challenge))
 # projects = get_projects(session_id)
 #print("Projects:")
 #print(projects)
