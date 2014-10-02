@@ -77,12 +77,6 @@ def get_last_entry_ids(session_id, experiment_id, entry_count):
 	        "entry_count": entry_count}
 	return _prepare_data_and_response(data)
 
-
-def _nice_print(a):
-	for n, m in a.items():
-		print(n + ": " + m)
-
-
 print("Version:")
 print(get_version())
 tmp = get_challenge("fredi@uni-siegen.de")
@@ -97,13 +91,13 @@ print(salt_db)
 print("Auth session")
 k = auth_session(session_id, "test1".encode("utf-8"), salt, challenge)
 # should fail
-_nice_print(k)
+print(k)
 k = get_projects(session_id)
-_nice_print(k)
+print(k)
 # should show nothing
 k = auth_session(session_id, "test".encode("utf-8"), salt, challenge)
 #should work
-_nice_print(k)
+print(k)
 k = get_projects(session_id)
-_nice_print(k)
+print(k)
 #should show nothing
