@@ -117,8 +117,8 @@ def auth_session(session_id, response):
 		try:
 			_cursor.execute("""UPDATE sessions SET authorized = True WHERE session_id = %s""", session_id)
 			_database.commit()
-		except Exception:
-			return {"status": "failed", "status2": "Exception"}
+		except Exception as a:
+			return {"status": "failed", "status2": "Exception", "a": str(a)}
 		else:
 			return {"status": "success"}
 	else:
