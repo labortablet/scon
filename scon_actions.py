@@ -115,8 +115,9 @@ def auth_session(session_id, response):
 	tmp = bcrypt.hashpw(hash_password, bcrypt.gensalt(10, challenge))
 	if _uni2bin(response) == tmp:
 		try:
-			_cursor.execute("""UPDATE sessions SET authorized = True WHERE session_id = %s""", session_id)
-			_database.commit()
+			pass
+		# _cursor.execute("""UPDATE sessions SET authorized = True WHERE session_id = %s""", session_id)
+		#_database.commit()
 		except Exception as E:
 			return {"status": "failed", "status2": "Exception", "a": str(E)}
 		else:
