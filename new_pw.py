@@ -8,8 +8,8 @@ __contact__ = "https://flambda.de/impressum.html"
 
 import uuid
 import hashlib
+import configparser
 
-from scon_actions import _enable_db
 import bcrypt
 
 
@@ -17,13 +17,24 @@ username = "fredi@uni-siegen.de"
 pw = "test".encode("utf-8")
 
 
-@_enable_db
 def new_pw(user, password):
 	salt = uuid.uuid4().bytes
 	hash_pw = hashlib.sha256(password).digest()
 	salted_pw = bcrypt.hashpw(hash_pw, bcrypt.gensalt(10, salt))
-	_cursor.execute("""UPDATE users SET salt = %s, hash_password = %s WHERE email = %s""", (salt, salted_pw, user))
-	_database.commit()
+	_config = configparser.ConfigParser()
+
+
+config = configparser.ConfigParser()
+config.read_file(open("/home/lablet/.my.cnf"))
+database = pymysql.connect(unix_socket=_config.get('client', 'socket'),
+                           port=_config.get('client', 'port'),
+                           user=_config.get('client', 'user'),
+                           passwd=_config.get('client', 'password'),
+                           db="lablet_tabletprojectdb",
+                           charset='utf8')
+cursor = database.cursor()
+cursor.execute("""UPDATE users SET salt = %s, hash_password = %s WHERE email = %s""", (salt, salted_pw, user))
+database.commit()
 
 
 new_pw(username, pw)
