@@ -16,7 +16,7 @@ from scon_actions import _uni2bin, _bin2uni
 
 pw_db = "test"
 value_db = _uni2bin("$2y$10$wbBPkWPW3dPqgLNR4GlvGeTqf2pWenxSz5pROlX/VMjmz6h1ye/.a")
-salt_db = _uni2bin("wbBPkWPW3dPqgLNR4GlvGg")
+salt_db = _uni2bin("wbBPkWPW3dPqgLNR4GlvGg==")
 
 url = 'https://lablet.vega.uberspace.de/scon/db.cgi'
 #url = 'https://lablet.vega.uberspace.de/scon/db_ustest.cgi'
