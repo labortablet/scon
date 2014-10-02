@@ -27,10 +27,10 @@ def new_pw(user, password):
 
 config = configparser.ConfigParser()
 config.read_file(open("/home/lablet/.my.cnf"))
-database = pymysql.connect(unix_socket=_config.get('client', 'socket'),
-                           port=_config.get('client', 'port'),
-                           user=_config.get('client', 'user'),
-                           passwd=_config.get('client', 'password'),
+database = pymysql.connect(unix_socket=config.get('client', 'socket'),
+                           port=config.get('client', 'port'),
+                           user=config.get('client', 'user'),
+                           passwd=config.get('client', 'password'),
                            db="lablet_tabletprojectdb",
                            charset='utf8')
 cursor = database.cursor()
