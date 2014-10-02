@@ -113,19 +113,16 @@ def auth_session(session_id, response):
 	WHERE sessions.id = %s""", session_id.bytes)
 	(hash_password, challenge) = _cursor.fetchall()[0]
 	tmp = bcrypt.hashpw(hash_password, bcrypt.gensalt(10, challenge))
-	return {"status": "failed", "a": _bin2uni(hash_password), "tmp": _bin2uni(tmp), "challenge": _bin2uni(challenge)}
-
-
-# if _uni2bin(response) == tmp:
-#	try:
-#		_cursor.execute("""UPDATE sessions SET authorized = True WHERE session_id = %s""", session_id)
-#		_database.commit()
-#	except Exception:
-#		return {"status": "failed", "status2": "Exception"}
-#	else:
-#		return {"status": "success"}
-#else:
-#	return {"status": "failed", "status2": "response_failed", "a": _bin2uni(hash_password), "tmp": _bin2uni(tmp)}
+	if _uni2bin(response) == tmp:
+		try:
+			_cursor.execute("""UPDATE sessions SET authorized = True WHERE session_id = %s""", session_id)
+			_database.commit()
+		except Exception:
+			return {"status": "failed", "status2": "Exception"}
+		else:
+			return {"status": "success"}
+	else:
+		return {"status": "failed", "status2": "response_failed", "a": _bin2uni(hash_password), "tmp": _bin2uni(tmp)}
 
 
 @_enable_db
