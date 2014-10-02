@@ -24,3 +24,6 @@ def new_pw(user, password):
 	salted_pw = bcrypt.hashpw(hash_pw, bcrypt.gensalt(10, salt))
 	_cursor.execute("""UPDATE users SET salt = %s, hash_password = %s WHERE email = %s""", (salt, salted_pw, user))
 	_database.commit()
+
+
+new_pw(username, pw)
