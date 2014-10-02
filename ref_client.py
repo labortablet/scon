@@ -95,5 +95,15 @@ print("Session_id: " + session_id)
 print("Salt: " + _bin2uni(salt))
 print(salt_db)
 print("Auth session")
-k = auth_session(session_id, pw_db.encode("utf-8"), salt, challenge)
+k = auth_session(session_id, "test1".encode("utf-8"), salt, challenge)
+# should fail
 _nice_print(k)
+k = get_projects(session_id)
+_nice_print(k)
+# should show nothing
+k = auth_session(session_id, "test".encode("utf-8"), salt, challenge)
+#should work
+_nice_print(k)
+k = get_projects(session_id)
+_nice_print(k)
+#should show nothing
