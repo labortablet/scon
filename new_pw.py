@@ -14,7 +14,7 @@ import bcrypt
 
 
 username = "fredi@uni-siegen.de"
-pw = "test"
+pw = "test".encode("utf-8")
 
 
 @_enable_db
