@@ -96,7 +96,17 @@ k = get_projects(session_id)
 print(k)
 # should show nothing
 k = auth_session(session_id, "test".encode("utf-8"), salt, challenge)
-#should work
+print(k)
+k = get_experiments(session_id)
+print(k)
+k = get_last_entry_ids(session_id, 1, 20)
+print(k)
+k = get_entry(session_id, 5)
+print(k)
+
+
+
+# should work
 print(k)
 k = get_projects(session_id)
 print(k)
