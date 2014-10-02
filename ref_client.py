@@ -26,11 +26,11 @@ def auth_session(session_id, pw, salt, challenge):
 	salt = bcrypt.gensalt(10, salt)  # modified the bcrypt file to allow my own random bytes
 	challenge = bcrypt.gensalt(10, challenge)  # modified the bcrypt file to allow my own random bytes
 	hash_pw = hashlib.sha256(pw).digest()
-	print("Hashed pw: " + _bin2uni(hash_pw))
+	print("Hashed pw: " + hash_pw.decode("ascii"))
 	salted_pw = bcrypt.hashpw(hash_pw, salt)
-	print("Salted PW: " + _bin2uni(salted_pw))
+	print("Salted PW: " + salted_pw.decode("ascii"))
 	response = bcrypt.hashpw(salted_pw, challenge)
-	print("Reponse: " + _bin2uni(response))
+	print("Reponse: " + response.decode("ascii"))
 	data = {"action": "auth_session", "session_id": session_id, "response": _bin2uni(response)}
 	return _prepare_data_and_response(data)
 
@@ -92,8 +92,9 @@ print("Salt: " + _bin2uni(salt))
 print(salt_db)
 print("Auth session")
 k = auth_session(session_id, pw_db.encode("utf-8"), salt, challenge)
-for a, b in k.items():
-	print(a + ": " + b)
+print("a: " + _uni2bin(k["a"]).decode("ascii"))
+print("tmp: " + _uni2bin(k["tmp"]).decode("ascii"))
+print("challenge: " + _uni2bin(k["challenge"]).decode("ascii"))
 	# projects = get_projects(session_id)
 #print("Projects:")
 #print(projects)
