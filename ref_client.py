@@ -26,7 +26,6 @@ def auth_session(session_id, pw, salt, challenge):
 	salt = bcrypt.gensalt(10, salt)  # modified the bcrypt file to allow my own random bytes
 	challenge = bcrypt.gensalt(10, challenge)  # modified the bcrypt file to allow my own random bytes
 	hash_pw = hashlib.sha256(pw).digest()
-	print("Hashed pw: " + hash_pw.decode("utf-8"))
 	salted_pw = bcrypt.hashpw(hash_pw, salt)
 	print("Salted PW: " + salted_pw.decode("utf-8"))
 	response = bcrypt.hashpw(salted_pw, challenge)
