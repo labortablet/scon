@@ -3,7 +3,7 @@
 __author__ = "Frederik Lauber"
 __copyright__ = "Copyright 2014"
 __license__ = "GPL3"
-__version__ = ""
+__version__ = "0.2"
 __maintainer__ = "Frederik Lauber"
 __status__ = "Development"
 __contact__ = "https://flambda.de/impressum.html"
