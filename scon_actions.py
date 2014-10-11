@@ -91,7 +91,7 @@ def get_challenge(username):
 	_cursor.execute(
 			"""INSERT INTO sessions(id, challenge, user_id) VALUES (%s,%s,%s)""",
 			(session_id, challenge, user_id))
-		_database.commit()
+	_database.commit()
 	#except Exception as E:
 	#	return {"status": "failed", "E": str(E)}
 	#else:
