@@ -87,18 +87,18 @@ def get_challenge(username):
 	session_id = uuid.uuid4().bytes
 	challenge = uuid.uuid4().bytes
 	(user_id, salt) = _get_userid_and_salt(username)
-	try:
-		_cursor.execute(
+	#try:
+	_cursor.execute(
 			"""INSERT INTO sessions(id, challenge, user_id) VALUES (%s,%s,%s)""",
 			(session_id, challenge, user_id))
 		_database.commit()
-	except Exception as E:
-		return {"status": "failed", "E": str(E)}
-	else:
-		return {"status": "success",
-		        "session_id": _bin2uni(session_id),
-	        "salt": _bin2uni(salt),
-	        "challenge": _bin2uni(challenge)}
+	#except Exception as E:
+	#	return {"status": "failed", "E": str(E)}
+	#else:
+	#	return {"status": "success",
+	#	        "session_id": _bin2uni(session_id),
+	#        "salt": _bin2uni(salt),
+	#        "challenge": _bin2uni(challenge)}
 
 
 @_enable_db
