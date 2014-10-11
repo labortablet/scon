@@ -87,35 +87,37 @@ def get_challenge(username):
 	session_id = uuid.uuid4().bytes
 	challenge = uuid.uuid4().bytes
 	(user_id, salt) = _get_userid_and_salt(username)
-	#try:
-	_cursor.execute(
-			"""INSERT INTO sessions(id, challenge, user_id) VALUES (%s,%s,%s)""",
+	try:
+		#FIXME SOME IDIOT CHANGED THE DB NAME, SO YEAH, THANK YOU VERY MUCH!
+		_cursor.execute(
+			"""INSERT INTO sessionsback(id, challenge, user_id) VALUES (%s,%s,%s)""",
 			(session_id, challenge, user_id))
-	_database.commit()
-	#except Exception as E:
-	#	return {"status": "failed", "E": str(E)}
-	#else:
-	#	return {"status": "success",
-	#	        "session_id": _bin2uni(session_id),
-	#        "salt": _bin2uni(salt),
-	#        "challenge": _bin2uni(challenge)}
+		_database.commit()
+	except Exception as E:
+		return {"status": "failed", "E": str(E)}
+	else:
+		return {"status": "success",
+		        "session_id": _bin2uni(session_id),
+		        "salt": _bin2uni(salt),
+		        "challenge": _bin2uni(challenge)}
 
 
 @_enable_db
 def auth_session(session_id, response):
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
+	#FIXME sessionsback!!!!!
 	_cursor.execute("""SELECT
 	users.hash_password,
-	sessions.challenge
+	sessionsback.challenge
 	FROM `users`
-	INNER JOIN `sessions`
-	ON sessions.user_id = users.id
-	WHERE sessions.id = %s""", session_id.bytes)
+	INNER JOIN `sessionsback`
+	ON sessionsback.user_id = users.id
+	WHERE sessionsback.id = %s""", session_id.bytes)
 	(hash_password, challenge) = _cursor.fetchall()[0]
 	tmp = bcrypt.hashpw(hash_password, bcrypt.gensalt(10, challenge))
 	if _uni2bin(response) == tmp:
 		try:
-			_cursor.execute("""UPDATE sessions SET authorized = True WHERE sessions.id = %s""", session_id.bytes)
+			_cursor.execute("""UPDATE sessionsback SET authorized = True WHERE sessionsback.id = %s""", session_id.bytes)
 			_database.commit()
 		except Exception as E:
 			return {"status": "failed"}
@@ -135,9 +137,9 @@ def get_user(session_id):
 	create_date,
 	email
 	FROM `users`
-	INNER JOIN `sessions`
-	ON sessions.user_id = user.id
-	WHERE sessions.authorized = True AND sessions.id = %s""", session_id.bytes)
+	INNER JOIN `sessionsback`
+	ON sessionsback.user_id = user.id
+	WHERE sessionsback.authorized = True AND sessionsback.id = %s""", session_id.bytes)
 	user_info = _cursor.fetchall()[0]
 	return {"status": "success", "user": user_info}
 
@@ -150,9 +152,9 @@ def get_projects(session_id):
 	users_projects_view.project_name,
 	users_projects_view.project_description
 	FROM `users_projects_view`
-	INNER JOIN `sessions`
-	ON sessions.user_id = users_projects_view.user_id
-	WHERE sessions.authorized = True AND sessions.id = %s""", session_id.bytes)
+	INNER JOIN `sessionsback`
+	ON sessionsback.user_id = users_projects_view.user_id
+	WHERE sessionsback.authorized = True AND sessionsback.id = %s""", session_id.bytes)
 	projects = _cursor.fetchall()
 	return {"status": "success", "projects": projects}
 
@@ -165,9 +167,9 @@ def get_experiments(session_id):
 	users_experiments_view.experiment_name,
 	users_experiments_view.experiment_description
 	FROM `users_experiments_view`
-	INNER JOIN `sessions`
-	ON users_experiments_view.user_id = sessions.user_id
-	WHERE sessions.authorized = True AND sessions.id = %s""", session_id.bytes)
+	INNER JOIN `sessionsback`
+	ON users_experiments_view.user_id = sessionsback.user_id
+	WHERE sessionsback.authorized = True AND sessionsback.id = %s""", session_id.bytes)
 	experiments = _cursor.fetchall()
 	return {"status": "success", "experiments": experiments}
 
@@ -184,9 +186,9 @@ def get_last_entry_ids(session_id, experiment_id, entry_count):
 	(SELECT DISTINCT group_id
 	FROM users_groups WHERE user_id IN
 	(SELECT user_id
-	FROM sessions
+	FROM sessionsback
 	WHERE
-	sessions.authorized = True AND sessions.id = %s))
+	sessionsback.authorized = True AND sessionsback.id = %s))
 	ORDER BY users_groups_entries_view.entry_date, users_groups_entries_view.entry_date_user DESC LIMIT %s""",
 	                (experiment_id, session_id.bytes, entry_count))
 	# get and flatten
@@ -216,9 +218,9 @@ def get_entry(session_id, entry_id):
 	(SELECT DISTINCT group_id
 	FROM users_groups WHERE user_id IN
 	(SELECT user_id
-	FROM sessions
+	FROM sessionsback
 	WHERE
-	sessions.authorized = True AND sessions.id = %s))""", (entry_id, session_id.bytes))
+	sessionsback.authorized = True AND sessionsback.id = %s))""", (entry_id, session_id.bytes))
 	entry_list = _cursor.fetchall()
 	if len(entry_list) > 1:
 		raise Exception("Entry id not unique")
