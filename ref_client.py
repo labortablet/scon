@@ -81,6 +81,7 @@ print("Version:")
 print(get_version())
 tmp = get_challenge("fredi@uni-siegen.de")
 print("Challenge:")
+print(tmp)
 salt = _uni2bin(tmp["salt"])
 challenge = _uni2bin(tmp["challenge"])
 session_id = tmp["session_id"]
