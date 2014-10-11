@@ -92,8 +92,8 @@ def get_challenge(username):
 			"""INSERT INTO sessions(id, challenge, user_id) VALUES (%s,%s,%s)""",
 			(session_id, challenge, user_id))
 		_database.commit()
-	except Exception:
-		return {"status": "failed"}
+	except Exception as E:
+		return {"status": "failed", "E": str(E)}
 	else:
 		return {"status": "success",
 		        "session_id": _bin2uni(session_id),
