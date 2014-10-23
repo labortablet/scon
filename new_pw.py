@@ -39,7 +39,7 @@ def new_pw(user, password):
 	print("Salt:")
 	print(_bin2uni(salt))
 	print("Hashed PW:")
-	print(hash_pw.decode("utf-8"))
+	print(_bin2uni(hash_pw))
 	print("Salted PW")
 	print(_bin2uni(salted_pw))
 
