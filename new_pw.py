@@ -33,6 +33,8 @@ def new_pw(user, password):
 	cursor = database.cursor()
 	cursor.execute("""UPDATE users SET salt = %s, hash_password = %s WHERE email = %s""", (salt, salted_pw, user))
 	database.commit()
+	print("Password:")
+	print(pw)
 	print("Salt:")
 	print(salt)
 	print("Hashed PW:")
