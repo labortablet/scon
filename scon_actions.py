@@ -192,55 +192,60 @@ def get_last_entry_ids(session_id, experiment_id, entry_count):
 
 @_enable_db
 def get_entry(session_id, entry_id):
-	entry_id = int(entry_id)
-	session_id = uuid.UUID(bytes=_uni2bin(session_id))
-	_cursor.execute("""SELECT
-	user_firstname,
-	user_lastname,
-	user_email,
-	group_name,
-	group_description,
-	project_id,
-	experiment_id,
-	entry_title,
-	entry_date,
-	entry_date_user,
-	entry_attachment,
-	entry_attachment_type
-	FROM `users_groups_entries_view`
-	WHERE users_groups_entries_view.entry_id = %s AND group_id IN
-	(SELECT DISTINCT group_id
-	FROM users_groups WHERE user_id IN
-	(SELECT user_id
-	FROM sessions
-	WHERE
-	sessions.authorized = True AND sessions.id = %s))""", (entry_id, session_id.bytes))
-	entry_list = _cursor.fetchall()
-	if len(entry_list) > 1:
-		raise Exception("Entry id not unique")
-	entry = entry_list[0]
-	(user_firstname,
-	 user_lastname,
-	 user_email,
-	 group_name,
-	 group_description,
-	 project_id,
-	 experiment_id,
-	 entry_title,
-	 entry_date,
-	 entry_date_user,
-	 entry_attachment,
-	 entry_attachment_type) = entry_list[0]
-	return {"status": "success",
-	        "user_firstname": user_firstname,
-	        "user_lastname": user_lastname,
-	        "user_email": user_email,
-	        "group_name": group_name,
-	        "group_description": group_description,
-	        "project_id": project_id,
-	        "experiment_id": experiment_id,
-	        "entry_title": entry_title,
-	        "entry_date": entry_date,
-	        "entry_date_user": entry_date_user}
+	try:
+		entry_id = int(entry_id)
+		session_id = uuid.UUID(bytes=_uni2bin(session_id))
+		_cursor.execute("""SELECT
+		user_firstname,
+		user_lastname,
+		user_email,
+		group_name,
+		group_description,
+		project_id,
+		experiment_id,
+		entry_title,
+		entry_date,
+		entry_date_user,
+		entry_attachment,
+		entry_attachment_type
+		FROM `users_groups_entries_view`
+		WHERE users_groups_entries_view.entry_id = %s AND group_id IN
+		(SELECT DISTINCT group_id
+		FROM users_groups WHERE user_id IN
+		(SELECT user_id
+		FROM sessions
+		WHERE
+		sessions.authorized = True AND sessions.id = %s))""", (entry_id, session_id.bytes))
+		entry_list = _cursor.fetchall()
+		if len(entry_list) > 1:
+			raise Exception("Entry id not unique")
+		entry = entry_list[0]
+		(user_firstname,
+		 user_lastname,
+		 user_email,
+		 group_name,
+		 group_description,
+		 project_id,
+		 experiment_id,
+		 entry_title,
+		 entry_date,
+		 entry_date_user,
+		 entry_attachment,
+		 entry_attachment_type) = entry_list[0]
+	except Exception as E:
+		return {"status": "failed", "E":str(E)}
+	else:
+		return {"status": "success"}
+	#return {"status": "success",
+	#        "user_firstname": user_firstname,
+	#        "user_lastname": user_lastname,
+	#        "user_email": user_email,
+	#        "group_name": group_name,
+	#        "group_description": group_description,
+	#        "project_id": project_id,
+	#        "experiment_id": experiment_id,
+	#        "entry_title": entry_title,
+	#        "entry_date": entry_date,
+	#        "entry_date_user": entry_date_user}
 	        #"entry_attachment": entry_attachment,
 	        #"entry_attachment_type": entry_attachment_type}
