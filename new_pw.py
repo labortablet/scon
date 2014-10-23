@@ -13,6 +13,7 @@ import configparser
 import bcrypt
 import pymysql
 
+from scon_actions import _uni2bin, _bin2uni
 
 username = "fredi@uni-siegen.de"
 pw = "test".encode("utf-8")
@@ -36,10 +37,10 @@ def new_pw(user, password):
 	print("Password:")
 	print(pw)
 	print("Salt:")
-	print(salt)
+	print(_bin2uni(salt))
 	print("Hashed PW:")
-	print(hash_pw)
+	print(_bin2uni(hash_pw))
 	print("Salted PW")
-	print(salted_pw)
+	print(_bin2uni(salted_pw))
 
 new_pw(username, pw)
