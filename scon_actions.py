@@ -236,9 +236,9 @@ def get_entry(session_id, entry_id):
 		        "user_firstname": user_firstname,
 		        "user_lastname": user_lastname,
 		        "user_email": user_email,
-		        "group_name": group_name}
-		        #"group_description": group_description,
-		        #"project_id": project_id,
+		        "group_name": group_name,
+		        "group_description": group_description,
+		        "project_id": project_id}
 		        #"experiment_id": experiment_id,
 		        #"entry_title": entry_title,
 		        #"entry_date": entry_date,
