@@ -234,9 +234,9 @@ def get_entry(session_id, entry_id):
 		 entry_attachment_type) = entry_list[0]
 		return {"status": "success",
 		        "user_firstname": user_firstname,
-		        "user_lastname": user_lastname}
-		        #"user_email": user_email,
-		        #"group_name": group_name,
+		        "user_lastname": user_lastname,
+		        "user_email": user_email,
+		        "group_name": group_name}
 		        #"group_description": group_description,
 		        #"project_id": project_id,
 		        #"experiment_id": experiment_id,
