@@ -27,10 +27,10 @@ def auth_session(session_id, pw, salt, challenge):
 	challenge = _gensalt(10, challenge)
 	hash_pw = hashlib.sha256(pw).digest()
 	salted_pw = bcrypt.hashpw(hash_pw, salt)
-	print("Salted PW: " + salted_pw.decode("utf-8"))
+	print("Salted PW: " + salted_pw)
 	response = bcrypt.hashpw(salted_pw, challenge)
-	print("Reponse: " + response.decode("utf-8"))
-	data = {"action": "auth_session", "session_id": session_id, "response": _bin2uni(response)}
+	print("Reponse: " + response)
+	data = {"action": "auth_session", "session_id": session_id, "response": response}
 	return _prepare_data_and_response(data)
 
 def get_last_entry_ids(session_id, entry_count):
@@ -90,7 +90,7 @@ print("Session_id: " + session_id)
 print("Salt: " + _bin2uni(salt))
 print(salt_db)
 print("Auth session")
-k = auth_session(session_id, "test".encode("utf-8"), salt, challenge)
+k = auth_session(session_id, "test", salt, challenge)
 # should fail
 print(k)
 k = get_projects(session_id)
@@ -106,7 +106,7 @@ print(k)
 
 
 # should work
-k = auth_session(session_id, "test".encode("utf-8"), salt, challenge)
+k = auth_session(session_id, "test", salt, challenge)
 print(k)
 k = get_projects(session_id)
 print(k)
