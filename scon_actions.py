@@ -17,12 +17,15 @@ import base64
 import pymysql
 import bcrypt
 from bcrypt._bcrypt import encode_salt
+import os
 
 class LabletBaseException(Exception):
 	pass
 
 
-def _gensalt(log_rounds = 12, salt):
+def _gensalt(log_rounds = 12, salt=None):
+	if salt is None:
+		salt = os.urandom(16)
 	return encode_salt(salt, min(max(log_rounds, 4), 31))
 
 #encode and decode a binary as a abs64 encoded string
