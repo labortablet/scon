@@ -16,10 +16,14 @@ import base64
 
 import pymysql
 import bcrypt
+from bcrypt._bcrypt import encode_salt
 
 class LabletBaseException(Exception):
 	pass
 
+
+def _gensalt(log_rounds = 12, salt):
+	return encode_salt(salt, min(max(log_rounds, 4), 31))
 
 #encode and decode a binary as a abs64 encoded string
 #will return a unicode object so we are independent from transmission encoding
@@ -108,7 +112,7 @@ def auth_session(session_id, response):
 	ON sessions.user_id = users.id
 	WHERE sessions.id = %s""", session_id.bytes)
 	(hash_password, challenge) = _cursor.fetchall()[0]
-	tmp = bcrypt.hashpw(hash_password, bcrypt.gensalt(10, challenge))
+	tmp = bcrypt.hashpw(hash_password, _gensalt(10, challenge))
 	if _uni2bin(response) == tmp:
 		try:
 			_cursor.execute("""UPDATE sessions SET authorized = True WHERE sessions.id = %s""", session_id.bytes)
