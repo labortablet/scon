@@ -13,6 +13,14 @@ import configparser
 import bcrypt
 import pymysql
 
+import tempfile
+
+a = tempfile.NamedTempfile("w")
+a.delete()
+
+
+
+
 from scon_actions import _uni2bin, _bin2uni
 
 username = "fredi@uni-siegen.de"
