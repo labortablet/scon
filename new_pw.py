@@ -10,16 +10,8 @@ import uuid
 import hashlib
 import configparser
 
-import bcrypt
+#import bcrypt
 import pymysql
-
-import tempfile
-
-a = tempfile.NamedTempfile("w")
-a.delete()
-
-
-
 
 from scon_actions import _uni2bin, _bin2uni
 
@@ -30,7 +22,8 @@ pw = "test".encode("utf-8")
 def new_pw(user, password):
 	salt = uuid.uuid4().bytes
 	hash_pw = hashlib.sha256(password).digest()
-	salted_pw = bcrypt.hashpw(hash_pw, bcrypt.gensalt(10, salt))
+	#salted_pw = bcrypt.hashpw(hash_pw, bcrypt.gensalt(10, salt))
+	salted_pw = hashlib.sha256(salt + hash_pw).digest()
 	config = configparser.ConfigParser()
 	config.read_file(open("/home/lablet/.my.cnf"))
 	database = pymysql.connect(unix_socket=config.get('client', 'socket'),

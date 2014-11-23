@@ -108,7 +108,7 @@ def auth_session(session_id, response):
 	ON sessions.user_id = users.id
 	WHERE sessions.id = %s""", session_id.bytes)
 	(hash_password, challenge) = _cursor.fetchall()[0]
-	tmp = hashlib.sha256().digest(challenge + hash_password)
+	tmp = hashlib.sha256(challenge + hash_password).digest()
 	if _uni2bin(response) == tmp:
 		try:
 			_cursor.execute("""UPDATE sessions SET authorized = True WHERE sessions.id = %s""", session_id.bytes)
