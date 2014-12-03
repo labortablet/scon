@@ -157,6 +157,7 @@ def get_projects(session_id):
 def get_experiments(session_id):
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
 	_cursor.execute("""SELECT
+	users_experiments_view.project_id,
 	users_experiments_view.experiment_id,
 	users_experiments_view.experiment_name,
 	users_experiments_view.experiment_description
@@ -174,7 +175,7 @@ def get_last_entry_ids(session_id, experiment_id, entry_count):
 	entry_count = int(entry_count)
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
 	_cursor.execute("""SELECT
-	entry_id
+	entry_id, entry_current_time
 	FROM `users_groups_entries_view`
 	WHERE users_groups_entries_view.experiment_id = %s AND group_id IN
 	(SELECT DISTINCT group_id
@@ -186,8 +187,8 @@ def get_last_entry_ids(session_id, experiment_id, entry_count):
 	ORDER BY users_groups_entries_view.entry_date, users_groups_entries_view.entry_date_user DESC LIMIT %s""",
 	                (experiment_id, session_id.bytes, entry_count))
 	# get and flatten
-	entry_ids = tuple(i[0] for i in _cursor.fetchall())
-	return {"status": "success", "entry_ids": entry_ids}
+	entry_id_timestamps = tuple((i[0], i[1]) for i in _cursor.fetchall())
+	return {"status": "success", "entry_id_timestamps": entry_id_timestamps}
 
 
 @_enable_db
