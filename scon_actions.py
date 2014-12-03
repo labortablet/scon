@@ -118,7 +118,7 @@ def auth_session(session_id, response):
 		else:
 			return {"status": "success"}
 	else:
-		return {"status": "failed", "R": _bin2uni(tmp)}
+		return {"status": "failed", "R": _bin2uni(tmp), "H":hash_password}
 
 
 @_enable_db
