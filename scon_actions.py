@@ -213,7 +213,6 @@ def get_entry(session_id, entry_id, entry_change_time):
 		_cursor.execute("""SELECT
 		user_firstname,
 		user_lastname,
-		project_id,
 		experiment_id,
 		entry_title,
 		entry_date,
