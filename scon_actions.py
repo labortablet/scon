@@ -203,7 +203,10 @@ def get_last_entry_ids(session_id, experiment_id, entry_count):
 
 
 @_enable_db
-def get_entry(session_id, entry_id):
+def get_entry(session_id, entry_id, entry_change_time):
+	#entry_change_time is not used right now
+	#but might be used to get
+	#a specific version of the entry
 	try:
 		entry_id = int(entry_id)
 		session_id = uuid.UUID(bytes=_uni2bin(session_id))
