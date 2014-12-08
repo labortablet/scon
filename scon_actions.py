@@ -13,7 +13,7 @@ import uuid
 import configparser
 import hashlib
 import base64
-
+import datetime
 
 import pymysql
 import os
@@ -30,6 +30,17 @@ def _uni2bin(uni):
 def _bin2uni(bin):
 	return base64.b64encode(bin).decode("ascii")
 
+def _removeAttachment(attachment_ref, attachment_type):
+	pass
+
+def _putAttachment(attachment, attachment_type):
+	attachment_ref = "foo"
+	return attachment_ref
+
+def _getAttachment(attachment_ref, attachment_type):
+	#only text right now
+	#needs to return a str object
+	return attachment_ref
 
 def _enable_db(func):
 	global _SERVER_STABLE_RANDOM
@@ -187,7 +198,7 @@ def get_last_entry_ids(session_id, experiment_id, entry_count):
 	ORDER BY users_groups_entries_view.entry_date, users_groups_entries_view.entry_date_user DESC LIMIT %s""",
 	                (experiment_id, session_id.bytes, entry_count))
 	# get and flatten
-	entry_id_timestamps = tuple((i[0], i[1]) for i in _cursor.fetchall())
+	entry_id_timestamps = tuple((i[0], i[1].timestamp()) for i in _cursor.fetchall())
 	return {"status": "success", "entry_id_timestamps": entry_id_timestamps}
 
 
@@ -199,14 +210,12 @@ def get_entry(session_id, entry_id):
 		_cursor.execute("""SELECT
 		user_firstname,
 		user_lastname,
-		user_email,
-		group_name,
-		group_description,
 		project_id,
 		experiment_id,
 		entry_title,
 		entry_date,
 		entry_date_user,
+		entry_current_time,
 		entry_attachment,
 		entry_attachment_type
 		FROM `users_groups_entries_view`
@@ -223,28 +232,80 @@ def get_entry(session_id, entry_id):
 		entry = entry_list[0]
 		(user_firstname,
 		 user_lastname,
-		 user_email,
-		 group_name,
-		 group_description,
-		 project_id,
 		 experiment_id,
 		 entry_title,
 		 entry_date,
 		 entry_date_user,
-		 entry_attachment,
+		 entry_current_time,
+		 entry_attachment_ref,
 		 entry_attachment_type) = entry_list[0]
+		attachment = _getAttachment(entry_attachment_ref, entry_attachment_type)
 		return {"status": "success",
 		        "user_firstname": user_firstname,
 		        "user_lastname": user_lastname,
-		        "user_email": user_email,
-		        "group_name": group_name,
-		        "group_description": group_description,
-		        "project_id": project_id,
 		        "experiment_id": experiment_id,
 		        "entry_title": entry_title,
-		        "entry_date": str(entry_date)}
-		        #"entry_date_user": entry_date_user}
-		        #"entry_attachment": entry_attachment,
-		        #"entry_attachment_type": entry_attachment_type}
+		        "entry_date": str(entry_date),
+		        "entry_date_user": str(entry_date_user),
+		        "entry_current_time": str(entry_current_time),
+		        "entry_attachment": attachment,
+		        "entry_attachment_type": entry_attachment_type}
 	except Exception as E:
 		return {"status": "failed", "E":str(E)}
+
+@_enable_db
+def send_entry(session_id, title, date_user, attachment, attachment_type, experiment_id):
+	#maybe this could also be done in mysql?
+	#not sure right now so I will do it like this
+	check = get_experiments(session_id)
+	if not check["status"] == "success":
+		raise Exception
+	valid_experiment = False
+	experiment_id = int(experiment_id)
+	for experiment in check["experiments"]:
+		if int(experiment[1]) == experiment_id:
+			valid_experiment = True
+			break
+	if not valid_experiment:
+		raise Exception
+	#so we are allowed to add to this experiment
+	session_id = uuid.UUID(bytes=_uni2bin(session_id))
+	#check we do not have a double sync
+	#rememeber, date_user is supposed to be unique within a experiment as stupid as
+	#it sounds.....
+	_cursor.execute("""SELECT
+	entry_id, entry_current_time
+	FROM `users_groups_entries_view`
+	WHERE users_groups_entries_view.experiment_id = %s AND entry_date_user = %s """,
+	                (experiment_id, date_user))
+	res = _cursor.fetchall()
+	if len(res) > 1:
+		#this should never happen!
+		raise Exception
+	elif len(res) == 1:
+		return {"status": "success", "info": "double sync", "entry_id": str(res[0][0]), "entry_current_time": str(res[0][1])}
+	current_time = datetime.datetime.utcnow()
+	date_user = datetime.datetime.fromutctimestamp(date_user)
+	#we might need to find a way to safely remove atatchments if the db fails
+	attachment_ref = _putAttachment(attachment, attachment_type)
+
+	_cursor.execute("""INSERT INTO
+		`entries`
+		(title,
+		date,
+		date_user
+		current_time,
+		attachment,
+		attachment_type,
+		expr_id,
+		user_id)
+		VALUES (%s,'%s','%s','%s',%s,%s,%s,
+			(SELECT user_id
+			FROM sessions
+			WHERE
+			sessions.authorized = True AND sessions.id = %s);SELECT LAST_INSERT_ID()
+		)""", (title, current_time, date_user, current_time, attachment_ref, attachment_type, experiment_id, session_id))
+	res = _cursor.fetchall()
+	return {"status": "success", "entry_id": str(res[0][0]), "entry_current_time": str(res[0][1])}
+	#except Exception as E:
+	#	return {"status": "failed", "E":str(E)}
