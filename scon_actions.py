@@ -214,7 +214,7 @@ def get_entry(session_id, entry_id, entry_change_time):
 	#entry_change_time is not used right now
 	#but might be used to get
 	#a specific version of the entry
-	try:
+	# try:
 		entry_id = int(entry_id)
 		session_id = uuid.UUID(bytes=_uni2bin(session_id))
 		_cursor.execute("""SELECT
@@ -267,8 +267,10 @@ def get_entry(session_id, entry_id, entry_change_time):
 		        "entry_current_time": entry_current_time,
 		        "entry_attachment": attachment,
 		        "entry_attachment_type": entry_attachment_type}
-	except Exception as E:
-		return {"status": "failed", "E": str(E)}
+
+
+# except Exception as E:
+#	return {"status": "failed", "E": str(E)}
 
 
 @_enable_db
