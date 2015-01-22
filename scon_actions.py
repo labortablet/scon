@@ -247,6 +247,10 @@ def get_entry(session_id, entry_id, entry_change_time):
 		 entry_attachment_ref,
 		 entry_attachment_type) = entry_list[0]
 		attachment = _getAttachment(entry_attachment_ref, entry_attachment_type)
+		mysql_timestring = '%Y-%m-%d %H:%M:%S'
+		entry_date = datetime.datetime.strptime(entry_date, mysql_timestring)
+		entry_date_user = datetime.datetime.strptime(entry_date_user, mysql_timestring)
+		entry_current_time, = datetime.datetime.strptime(entry_current_time, mysql_timestring)
 		return {"status": "success",
 		        "user_firstname": user_firstname,
 		        "user_lastname": user_lastname,
@@ -317,7 +321,6 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 		VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', user_id);
 		SELECT LAST_INSERT_ID()""", (
 	title, cur_time, date_user, cur_time, attachment_ref, attachment_type, experiment_id, session_id.bytes))
-	_cursor.execute("""""")
 	res = _cursor.fetchall()
 	return {"status": "success", "entry_id": str(res[0][0]), "entry_current_time": str(res[0][1])}
 
