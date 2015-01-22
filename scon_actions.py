@@ -286,8 +286,8 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 		raise Exception
 	elif len(res) == 1:
 		return {"status": "success", "info": "double sync", "entry_id": str(res[0][0]), "entry_current_time": str(res[0][1])}
-	current_time = datetime.utcnow()
-	date_user = datetime.fromutctimestamp(date_user)
+	current_time = datetime.datetime.utcnow()
+	date_user = datetime.datetime.fromutctimestamp(date_user)
 	#we might need to find a way to safely remove atatchments if the db fails
 	attachment_ref = _putAttachment(attachment, attachment_type)
 
