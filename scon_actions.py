@@ -286,7 +286,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 		return {"status": "failure", "info": "WTF? Check your bloddy database!"}
 	elif len(res) == 1:
 		return {"status": "success", "info": "double sync", "entry_id": str(res[0][0]), "entry_current_time": str(res[0][1])}
-	current_time = datetime.datetime.utcnow()
+	cur_time = datetime.datetime.utcnow()
 	date_user = datetime.datetime.utcfromtimestamp(int(date_user))
 	#we might need to find a way to safely remove atatchments if the db fails
 	attachment_ref = _putAttachment(attachment, attachment_type)
@@ -300,12 +300,12 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 		attachment_type,
 		expr_id,
 		user_id)
-		VALUES (%s,'%s','%s','%s',%s, %s, %s,
+		VALUES ('%s','%s','%s','%s', '%s', '%s', '%s',
 			(SELECT user_id
 			FROM sessions
 			WHERE
-			sessions.authorized = True AND sessions.id = %s)""", (
-	title, current_time, date_user, current_time, attachment_ref, attachment_type, experiment_id, session_id.bytes))
+			sessions.authorized = True AND sessions.id = %s))""", (
+	title, cur_time, date_user, cur_time, attachment_ref, attachment_type, experiment_id, session_id.bytes))
 	_cursor.execute("""SELECT LAST_INSERT_ID()""")
 	res = _cursor.fetchall()
 	return {"status": "success", "entry_id": str(res[0][0]), "entry_current_time": str(res[0][1])}
