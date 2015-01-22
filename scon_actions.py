@@ -294,7 +294,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 		`entries`
 		(title,
 		date,
-		date_user
+		date_user,
 		current_time,
 		attachment,
 		attachment_type,
