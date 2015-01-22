@@ -21,7 +21,8 @@ import pymysql
 class LabletBaseException(Exception):
 	pass
 
-#encode and decode a binary as a abs64 encoded string
+
+# encode and decode a binary as a abs64 encoded string
 #will return a unicode object so we are independent from transmission encoding
 def _uni2bin(uni):
 	return base64.b64decode(uni.encode("ascii"))
@@ -30,17 +31,21 @@ def _uni2bin(uni):
 def _bin2uni(bin):
 	return base64.b64encode(bin).decode("ascii")
 
+
 def _removeAttachment(attachment_ref, attachment_type):
 	pass
+
 
 def _putAttachment(attachment, attachment_type):
 	attachment_ref = "foo"
 	return attachment_ref
 
+
 def _getAttachment(attachment_ref, attachment_type):
 	#only text right now
 	#needs to return a str object
 	return attachment_ref
+
 
 def _enable_db(func):
 	global _SERVER_STABLE_RANDOM
@@ -50,11 +55,11 @@ def _enable_db(func):
 	_config.read_file(open("/home/lablet/.my.cnf"))
 	_SERVER_STABLE_RANDOM = _config.get('client', 'password')
 	_database = pymysql.connect(unix_socket=_config.get('client', 'socket'),
-                            port=_config.get('client', 'port'),
-                            user=_config.get('client', 'user'),
-                            passwd=_config.get('client', 'password'),
-                            db="lablet_tabletprojectdb",
-                            charset='utf8')
+	                            port=_config.get('client', 'port'),
+	                            user=_config.get('client', 'user'),
+	                            passwd=_config.get('client', 'password'),
+	                            db="lablet_tabletprojectdb",
+	                            charset='utf8')
 	del _config
 	_cursor = _database.cursor()
 
@@ -253,7 +258,8 @@ def get_entry(session_id, entry_id, entry_change_time):
 		        "entry_attachment": attachment,
 		        "entry_attachment_type": entry_attachment_type}
 	except Exception as E:
-		return {"status": "failed", "E":str(E)}
+		return {"status": "failed", "E": str(E)}
+
 
 @_enable_db
 def send_entry(session_id, title, date_user, attachment, attachment_type, experiment_id):
@@ -285,29 +291,35 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 		#this should never happen!
 		return {"status": "failure", "info": "WTF? Check your bloddy database!"}
 	elif len(res) == 1:
-		return {"status": "success", "info": "double sync", "entry_id": str(res[0][0]), "entry_current_time": str(res[0][1])}
+		return {"status": "success", "info": "double sync", "entry_id": str(res[0][0]),
+		        "entry_current_time": str(res[0][1])}
 	cur_time = datetime.datetime.utcnow()
 	date_user = datetime.datetime.utcfromtimestamp(int(date_user))
 	#we might need to find a way to safely remove atatchments if the db fails
 	attachment_ref = _putAttachment(attachment, attachment_type)
-	_cursor.execute("""INSERT INTO
+	_cursor.execute("""
+	SELECT user_id INTO @user_id
+		FROM sessions
+		WHERE
+		sessions.authorized = True AND sessions.id = %s);
+	INSERT INTO
 		`entries`
-		(title,
-		date,
-		date_user,
-		current_time,
-		attachment,
-		attachment_type,
-		expr_id,
-		user_id)
-		VALUES ('%s','%s','%s','%s', '%s', '%s', '%s',
-			(SELECT user_id
-			FROM sessions
-			WHERE
-			sessions.authorized = True AND sessions.id = %s))""", (
+		(
+			title,
+			date,
+			date_user,
+			current_time,
+			attachment,
+			attachment_type,
+			expr_id,
+			user_id
+		)
+		VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', user_id;
+		SELECT LAST_INSERT_ID()""", (
 	title, cur_time, date_user, cur_time, attachment_ref, attachment_type, experiment_id, session_id.bytes))
-	_cursor.execute("""SELECT LAST_INSERT_ID()""")
+	_cursor.execute("""""")
 	res = _cursor.fetchall()
 	return {"status": "success", "entry_id": str(res[0][0]), "entry_current_time": str(res[0][1])}
-	#except Exception as E:
-	#	return {"status": "failed", "E":str(E)}
+
+#except Exception as E:
+#	return {"status": "failed", "E":str(E)}
