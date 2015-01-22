@@ -257,13 +257,10 @@ def get_entry(session_id, entry_id, entry_change_time):
 		entry_date = str(entry_date.timestamp())
 		entry_date_user = str(entry_date_user.timestamp())
 		entry_current_time = str(entry_current_time.timestamp())
-		return {"status": "success",
-		        "user_firstname": user_firstname,
-		        "user_lastname": user_lastname,
-		        "experiment_id": experiment_id,
-		        "entry_title": entry_title,  # "entry_date": entry_date,
+		return {"status": "success",  # "user_firstname": user_firstname,  #"user_lastname": user_lastname,
+		        #"experiment_id": experiment_id,  #"entry_title": entry_title,  # "entry_date": entry_date,
 		        # #"entry_date_user": entry_date_user,  # "entry_current_time": entry_current_time,
-		        "entry_attachment": attachment,
+		        # "entry_attachment": attachment,
 		        "entry_attachment_type": entry_attachment_type}
 	except Exception as E:
 		return {"status": "failed", "E": str(E)}
