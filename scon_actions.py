@@ -254,9 +254,9 @@ def get_entry(session_id, entry_id, entry_change_time):
 		k = 3
 		attachment = _getAttachment(entry_attachment_ref, entry_attachment_type)
 		k = 4
-		entry_date = datetime.datetime.strptime(entry_date, _mysql_timestring)
-		entry_date_user = datetime.datetime.strptime(entry_date_user, _mysql_timestring)
-		entry_current_time = datetime.datetime.strptime(entry_current_time, _mysql_timestring)
+		# entry_date = datetime.datetime.strptime(entry_date, _mysql_timestring)
+		#entry_date_user = datetime.datetime.strptime(entry_date_user, _mysql_timestring)
+		#entry_current_time = datetime.datetime.strptime(entry_current_time, _mysql_timestring)
 		k = 5
 		entry_date = str(entry_date.timestamp())
 		entry_date_user = str(entry_date_user.timestamp())
