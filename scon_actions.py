@@ -305,8 +305,8 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 			FROM sessions
 			WHERE
 			sessions.authorized = True AND sessions.id = %s);SELECT LAST_INSERT_ID()
-		)""", (title, current_time, date_user, current_time, attachment_ref, attachment_type, experiment_id, session_id))
-	return {"status": "failure", "info": "1"}
+		)""", (
+	title, current_time, date_user, current_time, attachment_ref, attachment_type, experiment_id, session_id.bytes))
 	res = _cursor.fetchall()
 	return {"status": "success", "entry_id": str(res[0][0]), "entry_current_time": str(res[0][1])}
 	#except Exception as E:
