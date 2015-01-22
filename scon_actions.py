@@ -264,7 +264,7 @@ def get_entry(session_id, entry_id, entry_change_time):
 		        # "entry_attachment": attachment,
 	#        "entry_attachment_type": entry_attachment_type}
 	except Exception as E:
-		return {"status": "failed", "E": str(E)}
+		return {"status": "failed", "E": str(E), "A": entry_id, "B": entry_change_time}
 
 
 @_enable_db
