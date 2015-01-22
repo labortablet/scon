@@ -214,7 +214,7 @@ def get_entry(session_id, entry_id, entry_change_time):
 	#entry_change_time is not used right now
 	#but might be used to get
 	#a specific version of the entry
-	k = 0
+
 	try:
 		entry_id = int(entry_id)
 		session_id = uuid.UUID(bytes=_uni2bin(session_id))
@@ -236,12 +236,12 @@ def get_entry(session_id, entry_id, entry_change_time):
 		FROM sessions
 		WHERE
 		sessions.authorized = True AND sessions.id = %s))""", (entry_id, session_id.bytes))
-		k = 1
+
 		entry_list = _cursor.fetchall()
 		if len(entry_list) > 1:
 			raise Exception("Entry id not unique")
 		entry = entry_list[0]
-		k = 2
+
 		(user_firstname,
 		 user_lastname,
 		 experiment_id,
@@ -251,25 +251,25 @@ def get_entry(session_id, entry_id, entry_change_time):
 		 entry_current_time,
 		 entry_attachment_ref,
 		 entry_attachment_type) = entry_list[0]
-		k = 3
+
 		attachment = _getAttachment(entry_attachment_ref, entry_attachment_type)
-		k = 4
-		# entry_date = datetime.datetime.strptime(entry_date, _mysql_timestring)
-		#entry_date_user = datetime.datetime.strptime(entry_date_user, _mysql_timestring)
-		#entry_current_time = datetime.datetime.strptime(entry_current_time, _mysql_timestring)
-		k = 5
+
 		entry_date = str(entry_date.timestamp())
 		entry_date_user = str(entry_date_user.timestamp())
 		entry_current_time = str(entry_current_time.timestamp())
-		k = 6
-		return {"status": "success"}
-	# return {"status": "success",  # "user_firstname": user_firstname,  #"user_lastname": user_lastname,
-		        #"experiment_id": experiment_id,  #"entry_title": entry_title,  # "entry_date": entry_date,
-		        # #"entry_date_user": entry_date_user,  # "entry_current_time": entry_current_time,
-		        # "entry_attachment": attachment,
-	#        "entry_attachment_type": entry_attachment_type}
+
+		return {"status": "success",
+		        "user_firstname": user_firstname,
+		        "user_lastname": user_lastname,
+		        "experiment_id": experiment_id,
+		        "entry_title": entry_title,
+		        "entry_date": entry_date,
+		        "entry_date_user": entry_date_user,
+		        "entry_current_time": entry_current_time,
+		        "entry_attachment": attachment,
+		        "entry_attachment_type": entry_attachment_type}
 	except Exception as E:
-		return {"status": "failed", "E": str(E), "A": k}
+		return {"status": "failed", "E": str(E)}
 
 
 @_enable_db
