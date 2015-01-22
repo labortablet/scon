@@ -18,6 +18,8 @@ import datetime
 import pymysql
 
 
+_mysql_timestring = '%Y-%m-%d %H:%M:%S'
+
 class LabletBaseException(Exception):
 	pass
 
@@ -247,10 +249,10 @@ def get_entry(session_id, entry_id, entry_change_time):
 		 entry_attachment_ref,
 		 entry_attachment_type) = entry_list[0]
 		attachment = _getAttachment(entry_attachment_ref, entry_attachment_type)
-		mysql_timestring = '%Y-%m-%d %H:%M:%S'
-		entry_date = datetime.datetime.strptime(entry_date, mysql_timestring)
-		entry_date_user = datetime.datetime.strptime(entry_date_user, mysql_timestring)
-		entry_current_time, = datetime.datetime.strptime(entry_current_time, mysql_timestring)
+
+		entry_date = datetime.datetime.strptime(entry_date, _mysql_timestring).strftime("%s")
+		entry_date_user = datetime.datetime.strptime(entry_date_user, _mysql_timestring).strftime("%s")
+		entry_current_time, = datetime.datetime.strptime(entry_current_time, _mysql_timestring).strftime("%s")
 		return {"status": "success",
 		        "user_firstname": user_firstname,
 		        "user_lastname": user_lastname,
@@ -322,7 +324,8 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 		SELECT LAST_INSERT_ID()""", (
 	title, cur_time, date_user, cur_time, attachment_ref, attachment_type, experiment_id, session_id.bytes))
 	res = _cursor.fetchall()
-	return {"status": "success", "entry_id": str(res[0][0]), "entry_current_time": str(res[0][1])}
+	return {"status": "success", "entry_id": str(res[0][0]),
+	        "entry_current_time": str(datetime.datetime.strptime(res[0][1], _mysql_timestring).strftime("%s"))}
 
 #except Exception as E:
 #	return {"status": "failed", "E":str(E)}
