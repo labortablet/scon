@@ -250,9 +250,9 @@ def get_entry(session_id, entry_id, entry_change_time):
 		 entry_attachment_type) = entry_list[0]
 		attachment = _getAttachment(entry_attachment_ref, entry_attachment_type)
 
-		entry_date = datetime.datetime.strptime(entry_date, _mysql_timestring).timestamp()
-		entry_date_user = datetime.datetime.strptime(entry_date_user, _mysql_timestring).timestamp()
-		entry_current_time = datetime.datetime.strptime(entry_current_time, _mysql_timestring).timestamp()
+		# entry_date = datetime.datetime.strptime(entry_date, _mysql_timestring).timestamp()
+		#entry_date_user = datetime.datetime.strptime(entry_date_user, _mysql_timestring).timestamp()
+		#entry_current_time = datetime.datetime.strptime(entry_current_time, _mysql_timestring).timestamp()
 		return {"status": "success",
 		        "user_firstname": user_firstname,
 		        "user_lastname": user_lastname,
