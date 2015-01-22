@@ -254,9 +254,9 @@ def get_entry(session_id, entry_id, entry_change_time):
 
 		attachment = _getAttachment(entry_attachment_ref, entry_attachment_type)
 
-		entry_date = str(entry_date.timestamp())
-		entry_date_user = str(entry_date_user.timestamp())
-		entry_current_time = str(entry_current_time.timestamp())
+		entry_date = str(int(entry_date.timestamp()))
+		entry_date_user = str(int(entry_date_user.timestamp()))
+		entry_current_time = str(int(entry_current_time.timestamp()))
 
 		return {"status": "success",
 		        "user_firstname": user_firstname,
