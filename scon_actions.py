@@ -290,7 +290,6 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	date_user = datetime.datetime.utcfromtimestamp(int(date_user))
 	#we might need to find a way to safely remove atatchments if the db fails
 	attachment_ref = _putAttachment(attachment, attachment_type)
-	return {"status": "failure", "info": "1"}
 	_cursor.execute("""INSERT INTO
 		`entries`
 		(title,
@@ -307,6 +306,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 			WHERE
 			sessions.authorized = True AND sessions.id = %s);SELECT LAST_INSERT_ID()
 		)""", (title, current_time, date_user, current_time, attachment_ref, attachment_type, experiment_id, session_id))
+	return {"status": "failure", "info": "1"}
 	res = _cursor.fetchall()
 	return {"status": "success", "entry_id": str(res[0][0]), "entry_current_time": str(res[0][1])}
 	#except Exception as E:
