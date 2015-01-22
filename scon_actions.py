@@ -314,7 +314,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 			expr_id,
 			user_id
 		)
-		VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', user_id;
+		VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', user_id);
 		SELECT LAST_INSERT_ID()""", (
 	title, cur_time, date_user, cur_time, attachment_ref, attachment_type, experiment_id, session_id.bytes))
 	_cursor.execute("""""")
