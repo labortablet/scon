@@ -252,7 +252,7 @@ def get_entry(session_id, entry_id, entry_change_time):
 
 		entry_date = datetime.datetime.strptime(entry_date, _mysql_timestring).strftime("%s")
 		entry_date_user = datetime.datetime.strptime(entry_date_user, _mysql_timestring).strftime("%s")
-		entry_current_time, = datetime.datetime.strptime(entry_current_time, _mysql_timestring).strftime("%s")
+		entry_current_time = datetime.datetime.strptime(entry_current_time, _mysql_timestring).strftime("%s")
 		return {"status": "success",
 		        "user_firstname": user_firstname,
 		        "user_lastname": user_lastname,
