@@ -312,24 +312,25 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	SELECT `user_id` INTO @id
 		FROM `sessions`
 		WHERE
-		sessions.authorized = True AND sessions.id = %s;
-	INSERT INTO
-		`entries`
-		(
-			`title`,
-			`date`,
-			`date_user`,
-			`attachment`,
-			`attachment_type`,
-			`user_id`,
-			`expr_id`,
-			`current_time`
-		)
-		VALUES ('%s', %s, %s, %s, %s, id, %s, %s);
-		SELECT LAST_INSERT_ID()""", (
-	session_id.bytes, title, cur_time, date_user, attachment_ref, attachment_type, experiment_id, cur_time))
+		sessions.authorized = True AND sessions.id = %s;""", (session_id.bytes))
+	# INSERT INTO
+	#	`entries`
+	#	(
+	#		`title`,
+	#		`date`,
+	#		`date_user`,
+	#		`attachment`,
+	#		`attachment_type`,
+	#		`user_id`,
+	#		`expr_id`,
+	#		`current_time`
+	#	)
+	#	VALUES (%s, %s, %s, %s, %s, id, %s, %s);
+	#	SELECT LAST_INSERT_ID()""", (
+	#session_id.bytes, title, cur_time, date_user, attachment_ref, attachment_type, experiment_id, cur_time))
 	_database.commit()
-	return {"status": "failed"}
+	res = _cursor.fetchall()
+	return {"status": "failed", "E": str(res)}
 	return {"status": "success", "entry_id": str(res[0][0]),
 	        "entry_current_time": str(res[0][1].timestamp())}
 
