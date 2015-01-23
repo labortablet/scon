@@ -312,7 +312,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	SELECT user_id INTO @user_id
 		FROM sessions
 		WHERE
-		sessions.authorized = True AND sessions.id = %s);
+		sessions.authorized = True AND sessions.id = %s;
 	INSERT INTO
 		`entries`
 		(
