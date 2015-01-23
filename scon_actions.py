@@ -150,7 +150,7 @@ def get_user(session_id):
 	email
 	FROM `users`
 	INNER JOIN `sessions`
-	ON sessions.user_id = user.id
+	ON sessions.user_id = users.id
 	WHERE sessions.authorized = True AND sessions.id = %s""", session_id.bytes)
 	user_info = _cursor.fetchall()[0]
 	return {"status": "success", "user": user_info}
