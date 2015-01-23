@@ -330,7 +330,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	session_id.bytes, title, cur_time, date_user, attachment_ref, attachment_type, experiment_id, cur_time))
 	res = _cursor.fetchall()
 	return {"status": "success", "entry_id": str(res[0][0]),
-	        "entry_current_time": str(datetime.datetime.strptime(res[0][1], _mysql_timestring).strftime("%s"))}
+	        "entry_current_time": str(res[0][1].timestamp())}
 
 #except Exception as E:
 #	return {"status": "failed", "E":str(E)}
