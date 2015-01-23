@@ -329,6 +329,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 		SELECT LAST_INSERT_ID()""", (
 	session_id.bytes, title, cur_time, date_user, attachment_ref, attachment_type, experiment_id, cur_time))
 	res = _cursor.fetchall()
+	return {"status": "failed", "E": str(res)}
 	return {"status": "success", "entry_id": str(res[0][0]),
 	        "entry_current_time": str(res[0][1].timestamp())}
 
