@@ -306,7 +306,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 		        "entry_current_time": str(res[0][1])}
 	cur_time = datetime.datetime.utcnow()
 	date_user = datetime.datetime.utcfromtimestamp(int(date_user))
-	#we might need to find a way to safely remove atatchments if the db fails
+	# we might need to find a way to safely remove attachments if the db fails
 	attachment_ref = _putAttachment(attachment, attachment_type)
 	_cursor.execute("""
 	SELECT user_id INTO @user_id
@@ -328,6 +328,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 		VALUES ('%s', '%s', '%s', '%s', '%s', user_id, '%s', '%s');
 		SELECT LAST_INSERT_ID()""", (
 	session_id.bytes, title, cur_time, date_user, attachment_ref, attachment_type, experiment_id, cur_time))
+	_database.commit()
 	res = _cursor.fetchall()
 	return {"status": "failed", "E": str(res)}
 	return {"status": "success", "entry_id": str(res[0][0]),
