@@ -152,8 +152,9 @@ def get_user(session_id):
 	INNER JOIN `sessions`
 	ON sessions.user_id = users.id
 	WHERE sessions.authorized = True AND sessions.id = %s""", session_id.bytes)
-	user_info = _cursor.fetchall()[0]
-	return {"status": "success", "user": user_info}
+	(lastname, firstname, profil_image, create_date, email) = _cursor.fetchall()[0]
+	return {"status": "success", "lastname": lastname, "firstname": firstname,
+	        "create_date": str(int(create_date.timestamp()))}
 
 
 @_enable_db
