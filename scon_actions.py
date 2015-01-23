@@ -287,6 +287,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 			break
 	if not valid_experiment:
 		raise Exception
+	return get_user(session_id)
 	#so we are allowed to add to this experiment
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
 	#check we do not have a double sync
@@ -308,11 +309,11 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	date_user = datetime.datetime.utcfromtimestamp(int(date_user))
 	# we might need to find a way to safely remove attachments if the db fails
 	attachment_ref = _putAttachment(attachment, attachment_type)
-	_cursor.execute("""
-	SELECT sessions.user_id INTO @id
-		FROM `sessions`
-		WHERE
-		sessions.authorized = True AND sessions.id = %s;""", (session_id.bytes))
+	# _cursor.execute("""
+	#SELECT sessions.user_id INTO @id
+	#	FROM `sessions`
+	#	WHERE
+	#	sessions.authorized = True AND sessions.id = %s;""", (session_id.bytes))
 	# INSERT INTO
 	#	`entries`
 	#	(
@@ -328,7 +329,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	#	VALUES (%s, %s, %s, %s, %s, id, %s, %s);
 	#	SELECT LAST_INSERT_ID()""", (
 	#session_id.bytes, title, cur_time, date_user, attachment_ref, attachment_type, experiment_id, cur_time))
-	_database.commit()
+	#_database.commit()
 	res = _cursor.fetchall()
 	return {"status": "failed", "E": str(res)}
 	return {"status": "success", "entry_id": str(res[0][0]),
