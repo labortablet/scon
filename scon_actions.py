@@ -319,7 +319,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 			title,
 			date,
 			date_user,
-			`current_time`,
+			'current_time',
 			attachment,
 			attachment_type,
 			expr_id,
