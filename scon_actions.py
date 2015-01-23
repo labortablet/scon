@@ -309,8 +309,8 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	# we might need to find a way to safely remove attachments if the db fails
 	attachment_ref = _putAttachment(attachment, attachment_type)
 	_cursor.execute("""
-	SELECT user_id INTO @user_id
-		FROM sessions
+	SELECT `user_id` INTO @user_id
+		FROM `sessions`
 		WHERE
 		sessions.authorized = True AND sessions.id = %s;
 	INSERT INTO
