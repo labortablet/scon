@@ -316,18 +316,18 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	INSERT INTO
 		`entries`
 		(
-			title,
-			date,
-			date_user,
-			'current_time',
-			attachment,
-			attachment_type,
-			expr_id,
-			user_id
+			`title`,
+			`date`,
+			`date_user`,
+			`attachment`,
+			`attachment_type`,
+			`user_id`,
+			`expr_id`,
+			`current_time`
 		)
-		VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', user_id);
+		VALUES ('%s', '%s', '%s', '%s', '%s', user_id, '%s', '%s');
 		SELECT LAST_INSERT_ID()""", (
-	title, cur_time, date_user, cur_time, attachment_ref, attachment_type, experiment_id, session_id.bytes))
+	session_id.bytes, title, cur_time, date_user, attachment_ref, attachment_type, experiment_id, cur_time))
 	res = _cursor.fetchall()
 	return {"status": "success", "entry_id": str(res[0][0]),
 	        "entry_current_time": str(datetime.datetime.strptime(res[0][1], _mysql_timestring).strftime("%s"))}
