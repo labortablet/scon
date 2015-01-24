@@ -309,7 +309,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	#rememeber, date_user is supposed to be unique within a experiment as stupid as
 	#it sounds.....
 	_cursor.execute("""SELECT
-	entry_id, entry_current_time
+	entry_id, unix_timestamp(entry_current_time)
 	FROM `users_groups_entries_view`
 	WHERE users_groups_entries_view.experiment_id = %s AND entry_date_user = unix_timestamp(%s)""",
 	                (experiment_id, date_user))
