@@ -305,7 +305,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	if not valid_experiment:
 		raise Exception
 	#so we are allowed to add to this experiment
-
+	return {"status": "failure", "a": str(date_user.timestamp()), "E": str(experiment_id)}
 	#check we do not have a double sync
 	#rememeber, date_user is supposed to be unique within a experiment as stupid as
 	#it sounds.....
