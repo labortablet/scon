@@ -297,10 +297,9 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	_cursor.execute("""SELECT
 	entry_id, entry_current_time
 	FROM `users_groups_entries_view`
-	WHERE users_groups_entries_view.experiment_id = %s AND entry_date_user = %s """,
+	WHERE users_groups_entries_view.experiment_id = %s AND entry_date_user = %s""",
 	                (experiment_id, date_user))
 	res = _cursor.fetchall()
-	return {"status": "failed", "E": str(res)}
 	if len(res) > 1:
 		#this should never happen!
 		return {"status": "failure", "info": "WTF? Check your bloddy database!"}
@@ -311,11 +310,12 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	date_user = datetime.datetime.utcfromtimestamp(int(date_user))
 	# we might need to find a way to safely remove attachments if the db fails
 	attachment_ref = _putAttachment(attachment, attachment_type)
-	# _cursor.execute("""
-	#SELECT sessions.user_id INTO @id
-	#	FROM `sessions`
-	#	WHERE
-	#	sessions.authorized = True AND sessions.id = %s;""", (session_id.bytes))
+	# INTO @id
+	_cursor.execute("""
+	SELECT sessions.user_id
+		FROM `sessions`
+		WHERE
+		sessions.authorized = True AND sessions.id = %s""", (session_id.bytes))
 	# INSERT INTO
 	#	`entries`
 	#	(
