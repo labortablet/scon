@@ -328,7 +328,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	# INTO @id
 	#
 	_cursor.execute(
-		"""SELECT sessions.user_id FROM `sessions` WHERE sessions.authorized = True AND sessions.id = %s)""",
+		"""SELECT sessions.user_id FROM `sessions` WHERE sessions.authorized = True AND sessions.id = %s""",
 		(session_id.bytes))
 	res = _cursor.fetchall()
 	return {"status": "failed", "E": str(res)}
