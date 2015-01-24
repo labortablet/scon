@@ -331,7 +331,6 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 		"""SELECT sessions.user_id FROM `sessions` WHERE sessions.authorized = True AND sessions.id = %s""",
 		(session_id.bytes))
 	res = _cursor.fetchall()
-	return {"status": "failed", "E": str(res)}
 	user_id = res[0][0]
 	_cursor.execute("""INSERT INTO
 		`entries`
@@ -349,6 +348,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 		SELECT LAST_INSERT_ID()""", (
 	title, cur_time, date_user, attachment_ref, attachment_type, user_id, experiment_id, cur_time))
 	_database.commit()
+	return {"status": "failed", "E": str(res)}
 	res = _cursor.fetchall()
 
 	return {"status": "success", "entry_id": str(res[0][0]),
