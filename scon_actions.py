@@ -300,8 +300,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	WHERE users_groups_entries_view.experiment_id = %s AND entry_date_user = %s """,
 	                (experiment_id, date_user))
 	res = _cursor.fetchall()
-	tmpa["sd"] = str(res)
-	return get_user(tmpa)
+	return {"status": "failed", "E": str(res)}
 	if len(res) > 1:
 		#this should never happen!
 		return {"status": "failure", "info": "WTF? Check your bloddy database!"}
