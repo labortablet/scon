@@ -305,14 +305,13 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	if not valid_experiment:
 		raise Exception
 	#so we are allowed to add to this experiment
-	return {"status": "failure", "a": str(date_user.timestamp()), "E": str(experiment_id)}
 	#check we do not have a double sync
 	#rememeber, date_user is supposed to be unique within a experiment as stupid as
 	#it sounds.....
 	_cursor.execute("""SELECT
 	entry_id, entry_current_time
 	FROM `users_groups_entries_view`
-	WHERE users_groups_entries_view.experiment_id = %s AND entry_date_user = %s""",
+	WHERE users_groups_entries_view.experiment_id = %s AND entry_date_user = unix_timestamp(%s)""",
 	                (experiment_id, date_user))
 	res = _cursor.fetchall()
 	if len(res) > 1:
@@ -342,7 +341,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 			`expr_id`,
 			`current_time`
 		)
-		VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""", (
+		VALUES (%s, unix_timestamp(%s), unix_timestamp(%s), %s, %s, %s, %s, unix_timestamp(%s))""", (
 	title, cur_time, date_user, attachment_ref, attachment_type, user_id, experiment_id, cur_time))
 	_database.commit()
 	return {"status": "success", "entry_id": str(_cursor.lastrowid),
