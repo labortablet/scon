@@ -213,7 +213,7 @@ def get_last_entry_ids(session_id, experiment_id, entry_count):
 @_enable_db
 def check_auth(session_id):
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
-	_cursor.execute("""FROM sessions SELECT sessions.authorized WHERE sessions.id = %s""", (session_id.bytes))
+	_cursor.execute("""SELECT sessions.authorized FROM sessions WHERE sessions.id = %s""", (session_id.bytes))
 	res = _cursor.fetchall()
 	if len(res) > 1:
 		# this should never happen!
