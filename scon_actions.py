@@ -312,7 +312,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	entry_id, unix_timestamp(entry_current_time)
 	FROM `users_groups_entries_view`
 	WHERE users_groups_entries_view.experiment_id = %s AND entry_date_user = unix_timestamp(%s)""",
-	                (experiment_id, date_user))
+	                (experiment_id, date_user.timestamp()))
 	res = _cursor.fetchall()
 	if len(res) > 1:
 		#this should never happen!
@@ -342,7 +342,8 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 			`current_time`
 		)
 		VALUES (%s, unix_timestamp(%s), unix_timestamp(%s), %s, %s, %s, %s, unix_timestamp(%s))""", (
-	title, cur_time, date_user, attachment_ref, attachment_type, user_id, experiment_id, cur_time))
+	title, cur_time.timestamp(), date_user.timestamp(), attachment_ref, attachment_type, user_id, experiment_id,
+	cur_time.timestamp()))
 	_database.commit()
 	return {"status": "success", "entry_id": str(_cursor.lastrowid),
 	        "entry_current_time": str(int(cur_time.timestamp()))}
