@@ -290,10 +290,10 @@ def get_entry(session_id, entry_id, entry_change_time):
 
 @_enable_db
 def send_entry(session_id, title, date_user, attachment, attachment_type, experiment_id):
-	tmpa = session_id
-	#maybe this could also be done in mysql?
-	#not sure right now so I will do it like this
 	check = get_experiments(session_id)
+	session_id = uuid.UUID(bytes=_uni2bin(session_id))
+	cur_time = datetime.datetime.utcnow()
+	date_user = datetime.datetime.utcfromtimestamp(int(date_user))
 	if not check["status"] == "success":
 		raise Exception
 	valid_experiment = False
@@ -305,7 +305,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	if not valid_experiment:
 		raise Exception
 	#so we are allowed to add to this experiment
-	session_id = uuid.UUID(bytes=_uni2bin(session_id))
+
 	#check we do not have a double sync
 	#rememeber, date_user is supposed to be unique within a experiment as stupid as
 	#it sounds.....
@@ -321,8 +321,6 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	elif len(res) == 1:
 		return {"status": "success", "info": "double sync", "entry_id": str(res[0][0]),
 		        "entry_current_time": str(res[0][1])}
-	cur_time = datetime.datetime.utcnow()
-	date_user = datetime.datetime.utcfromtimestamp(int(date_user))
 	# we might need to find a way to safely remove attachments if the db fails
 	attachment_ref = _putAttachment(attachment, attachment_type)
 	# INTO @id
