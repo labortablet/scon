@@ -275,6 +275,7 @@ def get_entry(session_id, entry_id, entry_change_time):
 
 @_enable_db
 def send_entry(session_id, title, date_user, attachment, attachment_type, experiment_id):
+	tmpa = session_id
 	#maybe this could also be done in mysql?
 	#not sure right now so I will do it like this
 	check = get_experiments(session_id)
@@ -288,7 +289,6 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 			break
 	if not valid_experiment:
 		raise Exception
-	return get_user(session_id)
 	#so we are allowed to add to this experiment
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
 	#check we do not have a double sync
@@ -300,6 +300,8 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	WHERE users_groups_entries_view.experiment_id = %s AND entry_date_user = %s """,
 	                (experiment_id, date_user))
 	res = _cursor.fetchall()
+	tmpa["sd"] = str(res)
+	return get_user(tmpa)
 	if len(res) > 1:
 		#this should never happen!
 		return {"status": "failure", "info": "WTF? Check your bloddy database!"}
