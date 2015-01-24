@@ -317,7 +317,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	res = _cursor.fetchall()
 	if len(res) > 1:
 		#this should never happen!
-		return {"status": "failure", "info": "WTF? Check your bloddy database!"}
+		return {"status": "failure", "info": "WTF? Check your bloody database!"}
 	elif len(res) == 1:
 		return {"status": "success", "info": "double sync", "entry_id": str(res[0][0]),
 		        "entry_current_time": str(res[0][1])}
@@ -331,6 +331,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 		"""SELECT sessions.user_id FROM `sessions` WHERE sessions.authorized = True AND sessions.id = %s)""",
 		(session_id.bytes))
 	res = _cursor.fetchall()
+	return {"status": "failed", "E": str(res)}
 	user_id = res[0][0]
 	_cursor.execute("""INSERT INTO
 		`entries`
@@ -349,7 +350,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	title, cur_time, date_user, attachment_ref, attachment_type, user_id, experiment_id, cur_time))
 	_database.commit()
 	res = _cursor.fetchall()
-	return {"status": "failed", "E": str(res)}
+
 	return {"status": "success", "entry_id": str(res[0][0]),
 	        "entry_current_time": str(res[0][1].timestamp())}
 
