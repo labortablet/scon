@@ -327,9 +327,12 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	attachment_ref = _putAttachment(attachment, attachment_type)
 	# INTO @id
 	#
-	_cursor.execute("""
-	SET @id := (SELECT sessions.user_id INTO id FROM `sessions` WHERE sessions.authorized = True AND sessions.id = %s);
-	INSERT INTO
+	_cursor.execute(
+		"""SELECT sessions.user_id FROM `sessions` WHERE sessions.authorized = True AND sessions.id = %s)""",
+		(session_id.bytes))
+	res = _cursor.fetchall()
+	user_id = res[0][0]
+	_cursor.execute("""INSERT INTO
 		`entries`
 		(
 			`title`,
@@ -341,9 +344,9 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 			`expr_id`,
 			`current_time`
 		)
-		VALUES (%s, %s, %s, %s, %s, id, %s, %s);
+		VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
 		SELECT LAST_INSERT_ID()""", (
-	session_id.bytes, title, cur_time, date_user, attachment_ref, attachment_type, experiment_id, cur_time))
+	title, cur_time, date_user, attachment_ref, attachment_type, user_id, experiment_id, cur_time))
 	_database.commit()
 	res = _cursor.fetchall()
 	return {"status": "failed", "E": str(res)}
