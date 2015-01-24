@@ -347,10 +347,6 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 		VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""", (
 	title, cur_time, date_user, attachment_ref, attachment_type, user_id, experiment_id, cur_time))
 	_database.commit()
-	return {"status": "failed", "E": str(_cursor.lastrowid)}
+	return {"status": "success", "entry_id": str(_cursor.lastrowid),
+	        "entry_current_time": str(cur_time.timestamp())}
 
-	return {"status": "success", "entry_id": str(res[0][0]),
-	        "entry_current_time": str(res[0][1].timestamp())}
-
-#except Exception as E:
-#	return {"status": "failed", "E":str(E)}
