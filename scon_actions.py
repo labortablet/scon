@@ -151,10 +151,11 @@ def get_user(session_id):
 	email
 	FROM `users`
 	INNER JOIN `sessions`
-	ON sessions.user_id = user.id
+	ON sessions.user_id = users.id
 	WHERE sessions.authorized = True AND sessions.id = %s""", session_id.bytes)
-	user_info = _cursor.fetchall()[0]
-	return {"status": "success", "user": user_info}
+	(lastname, firstname, profil_image, create_date, email) = _cursor.fetchall()[0]
+	return {"status": "success", "lastname": lastname, "firstname": firstname,
+	        "create_date": str(int(create_date.timestamp()))}
 
 
 @_enable_db
@@ -208,6 +209,21 @@ def get_last_entry_ids(session_id, experiment_id, entry_count):
 	# get and flatten
 	entry_id_timestamps = tuple((i[0], 0 if i[1] is None else i[1].timestamp()) for i in _cursor.fetchall())
 	return {"status": "success", "entry_id_timestamps": entry_id_timestamps}
+
+
+@_enable_db
+def check_auth(session_id):
+	session_id = uuid.UUID(bytes=_uni2bin(session_id))
+	_cursor.execute("""SELECT sessions.authorized FROM sessions WHERE sessions.id = %s""", (session_id.bytes))
+	res = _cursor.fetchall()
+	if len(res) > 1:
+		# this should never happen!
+		return {"status": "failure", "info": "WTF? Check your bloody database!"}
+	elif len(res) == 1:
+		if res[0][0] == 1:
+			return {"status": "success", "auth": True}
+		else:
+			return {"status": "success", "auth": False}
 
 
 @_enable_db
@@ -275,9 +291,10 @@ def get_entry(session_id, entry_id, entry_change_time):
 
 @_enable_db
 def send_entry(session_id, title, date_user, attachment, attachment_type, experiment_id):
-	#maybe this could also be done in mysql?
-	#not sure right now so I will do it like this
 	check = get_experiments(session_id)
+	session_id = uuid.UUID(bytes=_uni2bin(session_id))
+	cur_time = datetime.datetime.utcnow()
+	date_user = datetime.datetime.utcfromtimestamp(int(date_user))
 	if not check["status"] == "success":
 		raise Exception
 	valid_experiment = False
@@ -289,49 +306,45 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	if not valid_experiment:
 		raise Exception
 	#so we are allowed to add to this experiment
-	session_id = uuid.UUID(bytes=_uni2bin(session_id))
 	#check we do not have a double sync
 	#rememeber, date_user is supposed to be unique within a experiment as stupid as
 	#it sounds.....
 	_cursor.execute("""SELECT
-	entry_id, entry_current_time
+	entry_id, unix_timestamp(entry_current_time)
 	FROM `users_groups_entries_view`
-	WHERE users_groups_entries_view.experiment_id = %s AND entry_date_user = %s """,
-	                (experiment_id, date_user))
+	WHERE users_groups_entries_view.experiment_id = %s AND entry_date_user = unix_timestamp(%s)""",
+	                (experiment_id, date_user.timestamp()))
 	res = _cursor.fetchall()
 	if len(res) > 1:
 		#this should never happen!
-		return {"status": "failure", "info": "WTF? Check your bloddy database!"}
+		return {"status": "failure", "info": "WTF? Check your bloody database!"}
 	elif len(res) == 1:
 		return {"status": "success", "info": "double sync", "entry_id": str(res[0][0]),
 		        "entry_current_time": str(res[0][1])}
-	cur_time = datetime.datetime.utcnow()
-	date_user = datetime.datetime.utcfromtimestamp(int(date_user))
-	#we might need to find a way to safely remove atatchments if the db fails
+	# we might need to find a way to safely remove attachments if the db fails
 	attachment_ref = _putAttachment(attachment, attachment_type)
-	_cursor.execute("""
-	SELECT user_id INTO @user_id
-		FROM sessions
-		WHERE
-		sessions.authorized = True AND sessions.id = %s);
-	INSERT INTO
+	# INTO @id
+	#
+	_cursor.execute(
+		"""SELECT sessions.user_id FROM `sessions` WHERE sessions.authorized = True AND sessions.id = %s""",
+		(session_id.bytes))
+	res = _cursor.fetchall()
+	user_id = res[0][0]
+	_cursor.execute("""INSERT INTO
 		`entries`
 		(
-			title,
-			date,
-			date_user,
-			current_time,
-			attachment,
-			attachment_type,
-			expr_id,
-			user_id
+			`title`,
+			`date`,
+			`date_user`,
+			`attachment`,
+			`attachment_type`,
+			`user_id`,
+			`expr_id`,
+			`current_time`
 		)
-		VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', user_id);
-		SELECT LAST_INSERT_ID()""", (
-	title, cur_time, date_user, cur_time, attachment_ref, attachment_type, experiment_id, session_id.bytes))
-	res = _cursor.fetchall()
-	return {"status": "success", "entry_id": str(res[0][0]),
-	        "entry_current_time": str(datetime.datetime.strptime(res[0][1], _mysql_timestring).strftime("%s"))}
+		VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""", (
+	title, cur_time, date_user, attachment_ref, attachment_type, user_id, experiment_id, cur_time))
+	_database.commit()
+	return {"status": "success", "entry_id": str(_cursor.lastrowid),
+	        "entry_current_time": str(int(cur_time.timestamp()))}
 
-#except Exception as E:
-#	return {"status": "failed", "E":str(E)}
