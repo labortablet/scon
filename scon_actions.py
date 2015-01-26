@@ -39,7 +39,8 @@ def _removeAttachment(attachment_ref, attachment_type):
 
 
 def _putAttachment(attachment, attachment_type):
-	attachment_ref = "foo"
+	#only text right now
+	attachment_ref = attachment
 	return attachment_ref
 
 
