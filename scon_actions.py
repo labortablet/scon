@@ -126,6 +126,7 @@ def auth_session(session_id, response):
 	tmp = hashlib.sha256(challenge + hash_password).digest()
 	if _uni2bin(response) == tmp:
 		_cursor.execute("""UPDATE sessions SET authorized = True WHERE sessions.id = %s""", session_id.bytes)
+		_database.commit()
 		return {"status": "success"}
 	else:
 		return {"status": "failed", "Info": "Password seems to be incorrect"}
