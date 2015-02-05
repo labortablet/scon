@@ -58,12 +58,7 @@ try:
 	response_dict = getattr(scon_actions, action)(**arguments)
 #action_dict[action](**arguments)
 except Exception as E:
-	print("Content-Type: text/html\n\n")
-	print("<html><body>")
-	print("<p>Exception happened!</p><p>{0}</p>".format(E))
-	print("<p>" + str(arguments) + "</p>")
-	print("</body></html>")
-	sys.exit()
+	response_dict = {"status": "failed", "E": str(E)}
 
 sys.stdout.buffer.write('Content-Type: application/json\n\n'.encode('utf-8'))
 sys.stdout.buffer.write(json.dumps(response_dict).encode('utf-8'))

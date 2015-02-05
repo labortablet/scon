@@ -101,18 +101,14 @@ def get_challenge(username):
 	session_id = uuid.uuid4().bytes
 	challenge = uuid.uuid4().bytes
 	(user_id, salt) = _get_userid_and_salt(username)
-	try:
-		_cursor.execute(
-			"""INSERT INTO sessions(id, challenge, user_id) VALUES (%s,%s,%s)""",
-			(session_id, challenge, user_id))
-		_database.commit()
-	except Exception as E:
-		return {"status": "failed", "E": str(E)}
-	else:
-		return {"status": "success",
-		        "session_id": _bin2uni(session_id),
-		        "salt": _bin2uni(salt),
-		        "challenge": _bin2uni(challenge)}
+	_cursor.execute(
+		"""INSERT INTO sessions(id, challenge, user_id) VALUES (%s,%s,%s)""",
+		(session_id, challenge, user_id))
+	_database.commit()
+	return {"status": "success",
+	        "session_id": _bin2uni(session_id),
+	        "salt": _bin2uni(salt),
+	        "challenge": _bin2uni(challenge)}
 
 
 @_enable_db
@@ -128,15 +124,10 @@ def auth_session(session_id, response):
 	(hash_password, challenge) = _cursor.fetchall()[0]
 	tmp = hashlib.sha256(challenge + hash_password).digest()
 	if _uni2bin(response) == tmp:
-		try:
-			_cursor.execute("""UPDATE sessions SET authorized = True WHERE sessions.id = %s""", session_id.bytes)
-			_database.commit()
-		except Exception as E:
-			return {"status": "failed"}
-		else:
-			return {"status": "success"}
+		_cursor.execute("""UPDATE sessions SET authorized = True WHERE sessions.id = %s""", session_id.bytes)
+		return {"status": "success"}
 	else:
-		return {"status": "failed"}
+		return {"status": "failed", "Info": "Password seems to be incorrect"}
 
 
 @_enable_db
@@ -230,62 +221,58 @@ def get_entry(session_id, entry_id, entry_change_time):
 	#entry_change_time is not used right now
 	#but might be used to get
 	#a specific version of the entry
+	entry_id = int(entry_id)
+	session_id = uuid.UUID(bytes=_uni2bin(session_id))
+	_cursor.execute("""SELECT
+	user_firstname,
+	user_lastname,
+	experiment_id,
+	entry_title,
+	entry_date,
+	entry_date_user,
+	entry_current_time,
+	entry_attachment,
+	entry_attachment_type
+	FROM `users_groups_entries_view`
+	WHERE users_groups_entries_view.entry_id = %s AND group_id IN
+	(SELECT DISTINCT group_id
+	FROM users_groups WHERE user_id IN
+	(SELECT user_id
+	FROM sessions
+	WHERE
+	sessions.authorized = True AND sessions.id = %s))""", (entry_id, session_id.bytes))
 
-	try:
-		entry_id = int(entry_id)
-		session_id = uuid.UUID(bytes=_uni2bin(session_id))
-		_cursor.execute("""SELECT
-		user_firstname,
-		user_lastname,
-		experiment_id,
-		entry_title,
-		entry_date,
-		entry_date_user,
-		entry_current_time,
-		entry_attachment,
-		entry_attachment_type
-		FROM `users_groups_entries_view`
-		WHERE users_groups_entries_view.entry_id = %s AND group_id IN
-		(SELECT DISTINCT group_id
-		FROM users_groups WHERE user_id IN
-		(SELECT user_id
-		FROM sessions
-		WHERE
-		sessions.authorized = True AND sessions.id = %s))""", (entry_id, session_id.bytes))
+	entry_list = _cursor.fetchall()
+	if len(entry_list) > 1:
+		raise Exception("Entry id not unique")
+	entry = entry_list[0]
 
-		entry_list = _cursor.fetchall()
-		if len(entry_list) > 1:
-			raise Exception("Entry id not unique")
-		entry = entry_list[0]
+	(user_firstname,
+	 user_lastname,
+	 experiment_id,
+	 entry_title,
+	 entry_date,
+	 entry_date_user,
+	 entry_current_time,
+	 entry_attachment_ref,
+	 entry_attachment_type) = entry_list[0]
 
-		(user_firstname,
-		 user_lastname,
-		 experiment_id,
-		 entry_title,
-		 entry_date,
-		 entry_date_user,
-		 entry_current_time,
-		 entry_attachment_ref,
-		 entry_attachment_type) = entry_list[0]
+	attachment = _getAttachment(entry_attachment_ref, entry_attachment_type)
 
-		attachment = _getAttachment(entry_attachment_ref, entry_attachment_type)
+	entry_date = str(int(entry_date.timestamp()))
+	entry_date_user = str(int(entry_date_user.timestamp()))
+	entry_current_time = str(int(entry_current_time.timestamp()))
 
-		entry_date = str(int(entry_date.timestamp()))
-		entry_date_user = str(int(entry_date_user.timestamp()))
-		entry_current_time = str(int(entry_current_time.timestamp()))
-
-		return {"status": "success",
-		        "user_firstname": user_firstname,
-		        "user_lastname": user_lastname,
-		        "experiment_id": experiment_id,
-		        "entry_title": entry_title,
-		        "entry_date": entry_date,
-		        "entry_date_user": entry_date_user,
-		        "entry_current_time": entry_current_time,
-		        "entry_attachment": attachment,
-		        "entry_attachment_type": entry_attachment_type}
-	except Exception as E:
-		return {"status": "failed", "E": str(E)}
+	return {"status": "success",
+	        "user_firstname": user_firstname,
+	        "user_lastname": user_lastname,
+	        "experiment_id": experiment_id,
+	        "entry_title": entry_title,
+	        "entry_date": entry_date,
+	        "entry_date_user": entry_date_user,
+	        "entry_current_time": entry_current_time,
+	        "entry_attachment": attachment,
+	        "entry_attachment_type": entry_attachment_type}
 
 
 @_enable_db
