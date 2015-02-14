@@ -169,7 +169,7 @@ def get_user(session_id):
 	lastname,
 	firstname,
 	profil_image,
-	create_date,
+	UNIX_TIMESTAMP(create_date),
 	email
 	FROM `users`
 	INNER JOIN `sessions`
@@ -177,7 +177,7 @@ def get_user(session_id):
 	WHERE sessions.authorized = True AND sessions.id = %s""", session_id.bytes)
 	(lastname, firstname, profil_image, create_date, email) = _cursor.fetchall()[0]
 	return {"status": "success", "lastname": lastname, "firstname": firstname,
-	        "create_date": str(int(create_date.timestamp()))}
+	        "create_date": str(create_date)}
 
 
 @_enable_db
@@ -217,7 +217,7 @@ def get_last_entry_ids(session_id, experiment_id, entry_count):
 	entry_count = int(entry_count)
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
 	_cursor.execute("""SELECT
-	entry_id, entry_current_time
+	entry_id, UNIX_TIMESTAMP(entry_current_time)
 	FROM `users_groups_entries_view`
 	WHERE users_groups_entries_view.experiment_id = %s AND group_id IN
 	(SELECT DISTINCT group_id
@@ -260,9 +260,9 @@ def get_entry(session_id, entry_id, entry_change_time):
 	user_lastname,
 	experiment_id,
 	entry_title,
-	entry_date,
-	entry_date_user,
-	entry_current_time,
+	UNIX_TIMESTAMP(entry_date),
+	UNIX_TIMESTAMP(entry_date_user),
+	UNIX_TIMESTAMP(entry_current_time),
 	entry_attachment,
 	entry_attachment_type
 	FROM `users_groups_entries_view`
@@ -312,7 +312,6 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	check = get_experiments(session_id)
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
 	cur_time = datetime.datetime.utcnow()
-	date_user_obj = datetime.datetime.utcfromtimestamp(date_user)
 	if not check["status"] == "success":
 		raise Exception
 	valid_experiment = False
@@ -328,10 +327,10 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	#rememeber, date_user is supposed to be unique within a experiment as stupid as
 	#it sounds.....
 	_cursor.execute("""SELECT
-	entry_id, unix_timestamp(entry_current_time)
+	entry_id, UNIX_TIMESTAMP(entry_current_time)
 	FROM `users_groups_entries_view`
-	WHERE users_groups_entries_view.experiment_id = %s AND entry_date_user = unix_timestamp(%s)""",
-	                (experiment_id, date_user_obj.timestamp()))
+	WHERE users_groups_entries_view.experiment_id = %s AND UNIX_TIMESTAMP(entry_date_user) = UNIX_TIMESTAMP(%s)""",
+	                (experiment_id, date_user))
 	res = _cursor.fetchall()
 	if len(res) > 1:
 		#this should never happen!
@@ -360,7 +359,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 			`expr_id`,
 			`current_time`
 		)
-		VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""", (
+		VALUES (%s, UNIX_TIMESTAMP(%s), UNIX_TIMESTAMP(%s), %s, %s, %s, %s, UNIX_TIMESTAMP(%s))""", (
 	title, cur_time, date_user_obj, attachment_ref, attachment_type, user_id, experiment_id, cur_time))
 	_database.commit()
 	return {"status": "success", "entry_id": str(_cursor.lastrowid),
