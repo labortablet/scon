@@ -89,6 +89,37 @@ def _get_userid_and_salt(username):
 		return None, salt
 
 
+@_enable_db
+def _get_authed_session(username):
+	session_id = uuid.uuid4().bytes
+	(user_id, salt) = _get_userid_and_salt(username)
+	_cursor.execute(
+		"""INSERT INTO sessions(id, user_id, authorized) VALUES (%s,%s,True)""",
+		(session_id, user_id))
+	_database.commit()
+	return session_id
+
+
+@_enable_db
+def auth_session(session_id, response):
+	session_id = uuid.UUID(bytes=_uni2bin(session_id))
+	_cursor.execute("""SELECT
+	users.hash_password,
+	sessions.challenge
+	FROM `users`
+	INNER JOIN `sessions`
+	ON sessions.user_id = users.id
+	WHERE sessions.id = %s""", session_id.bytes)
+	(hash_password, challenge) = _cursor.fetchall()[0]
+	tmp = hashlib.sha256(challenge + hash_password).digest()
+	if _uni2bin(response) == tmp:
+		_cursor.execute("""UPDATE sessions SET authorized = True WHERE sessions.id = %s""", session_id.bytes)
+		_database.commit()
+		return {"status": "success"}
+	else:
+		return {"status": "failed", "Info": "Password seems to be incorrect"}
+
+
 def echo(**kwargs):
 	return kwargs
 
