@@ -291,9 +291,9 @@ def get_entry(session_id, entry_id, entry_change_time):
 
 	attachment = _getAttachment(entry_attachment_ref, entry_attachment_type)
 
-	entry_date = str(int(entry_date.timestamp()))
-	entry_date_user = str(int(entry_date_user.timestamp()))
-	entry_current_time = str(int(entry_current_time.timestamp()))
+	entry_date = str(entry_date)
+	entry_date_user = str(entry_date_user)
+	entry_current_time = str(entry_current_time)
 
 	return {"status": "success",
 	        "user_firstname": user_firstname,
@@ -360,7 +360,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 			`current_time`
 		)
 		VALUES (%s, UNIX_TIMESTAMP(%s), UNIX_TIMESTAMP(%s), %s, %s, %s, %s, UNIX_TIMESTAMP(%s))""", (
-	title, cur_time, date_user_obj, attachment_ref, attachment_type, user_id, experiment_id, cur_time))
+	title, cur_time, date_user, attachment_ref, attachment_type, user_id, experiment_id, cur_time))
 	_database.commit()
 	return {"status": "success", "entry_id": str(_cursor.lastrowid),
 	        "entry_current_time": str(int(cur_time.timestamp()))}
