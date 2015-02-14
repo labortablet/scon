@@ -88,7 +88,6 @@ def _get_userid_and_salt(username):
 		salt = m.digest()
 		return None, salt
 
-
 @_enable_db
 def _get_authed_session(username):
 	session_id = uuid.uuid4().bytes
@@ -97,7 +96,7 @@ def _get_authed_session(username):
 		"""INSERT INTO sessions(id, user_id, authorized) VALUES (%s,%s,True)""",
 		(session_id, user_id))
 	_database.commit()
-	return session_id
+	return _bin2uni(session_id)
 
 
 @_enable_db
@@ -313,7 +312,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	check = get_experiments(session_id)
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
 	cur_time = datetime.datetime.utcnow()
-	date_user_obj = datetime.datetime.utcfromtimestamp(11)
+	date_user_obj = datetime.datetime.utcfromtimestamp(date_user)
 	if not check["status"] == "success":
 		raise Exception
 	valid_experiment = False
