@@ -311,7 +311,7 @@ def get_entry(session_id, entry_id, entry_change_time):
 def send_entry(session_id, title, date_user, attachment, attachment_type, experiment_id):
 	check = get_experiments(session_id)
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
-	cur_time = datetime.datetime.utcnow()
+	cur_time = datetime.datetime.utcnow().timestamp()
 	if not check["status"] == "success":
 		raise Exception
 	valid_experiment = False
@@ -360,7 +360,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 			`current_time`
 		)
 		VALUES (%s, UNIX_TIMESTAMP(%s), UNIX_TIMESTAMP(%s), %s, %s, %s, %s, UNIX_TIMESTAMP(%s))""", (
-	title, cur_time, date_user, attachment_ref, attachment_type, user_id, experiment_id, cur_time))
+	title, cur_time, int(date_user), attachment_ref, attachment_type, user_id, experiment_id, cur_time))
 	_database.commit()
 	return {"status": "success", "entry_id": str(_cursor.lastrowid),
 	        "entry_current_time": str(int(cur_time.timestamp()))}
