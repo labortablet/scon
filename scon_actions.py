@@ -363,5 +363,5 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	title, cur_time, int(date_user), attachment_ref, attachment_type, user_id, experiment_id, cur_time))
 	_database.commit()
 	return {"status": "success", "entry_id": str(_cursor.lastrowid),
-	        "entry_current_time": str(int(cur_time.timestamp()))}
+	        "entry_current_time": str(cur_time)}
 
