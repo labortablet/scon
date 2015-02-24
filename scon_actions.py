@@ -329,7 +329,7 @@ def send_entry(session_id, title, date_user, attachment, attachment_type, experi
 	_cursor.execute("""SELECT
 	entry_id, UNIX_TIMESTAMP(entry_current_time)
 	FROM `users_groups_entries_view`
-	WHERE users_groups_entries_view.experiment_id = %s AND FROM_UNIXTIME(entry_date_user) = FROM_UNIXTIME(%s)""",
+	WHERE users_groups_entries_view.experiment_id = %s AND entry_date_user = FROM_UNIXTIME(%s)""",
 	                (experiment_id, date_user))
 	res = _cursor.fetchall()
 	if len(res) > 1:
