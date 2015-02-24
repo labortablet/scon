@@ -311,7 +311,7 @@ def get_entry(session_id, entry_id, entry_change_time):
 def send_entry(session_id, title, date_user, attachment, attachment_type, experiment_id):
 	check = get_experiments(session_id)
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
-	cur_time = datetime.datetime.utcnow().timestamp()
+	cur_time = int(datetime.datetime.utcnow())
 	if not check["status"] == "success":
 		raise Exception
 	valid_experiment = False
