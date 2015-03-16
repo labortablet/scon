@@ -29,6 +29,12 @@ def _enable_db(func):
 	del _config
 	_cursor = _database.cursor()
 
+	def do_nothing(func):
+		return func
+
+	_enable_db = do_nothing
+	return func
+
 
 @_enable_db
 def new_pw(user, password):
