@@ -13,6 +13,9 @@ import configparser
 from scon_actions import _enable_db
 
 
+_database = None
+_cursor = None
+
 @_enable_db
 def new_pw(user, password):
 	salt = uuid.uuid4().bytes
