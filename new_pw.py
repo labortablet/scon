@@ -10,15 +10,10 @@ import uuid
 import hashlib
 import configparser
 
-#import bcrypt
-import pymysql
-
-from scon_actions import _uni2bin, _bin2uni
-
-username = "fredi@uni-siegen.de"
-pw = "test".encode("utf-8")
+from scon_actions import _enable_db
 
 
+@_enable_db
 def new_pw(user, password):
 	salt = uuid.uuid4().bytes
 	hash_pw = hashlib.sha256(password).digest()
@@ -26,22 +21,24 @@ def new_pw(user, password):
 	salted_pw = hashlib.sha256(salt + hash_pw).digest()
 	config = configparser.ConfigParser()
 	config.read_file(open("/home/lablet/.my.cnf"))
-	database = pymysql.connect(unix_socket=config.get('client', 'socket'),
-	                           port=config.get('client', 'port'),
-	                           user=config.get('client', 'user'),
-	                           passwd=config.get('client', 'password'),
-	                           db="lablet_tabletprojectdb",
-	                           charset='utf8')
-	cursor = database.cursor()
-	cursor.execute("""UPDATE users SET salt = %s, hash_password = %s WHERE email = %s""", (salt, salted_pw, user))
-	database.commit()
-	print("Password:")
-	print(pw)
-	print("Salt:")
-	print(_bin2uni(salt))
-	print("Hashed PW bin2uni:")
-	print(_bin2uni(hash_pw))
-	print("Salted PW")
-	print(_bin2uni(salted_pw))
+	_cursor.execute("""UPDATE users SET salt = %s, hash_password = %s WHERE email = %s""", (salt, salted_pw, user))
+	_database.commit()
 
-new_pw(username, pw)
+
+@_enable_db
+def get_usernames():
+	_cursor.execute("""SELECT email FROM `users`""")
+	return tuple(i[0] for i in _cursor.fetchall())
+
+
+while True:
+	names = get_usernames()
+	letters = len(str(len(names)))
+	for num, name in enumerate(names):
+		print(str(num).zfill(letters), ": ", name)
+	select = int(input("Give number to change PW:"))
+	if select < len(names):
+		pw = input("Type Password")
+		new_pw(names[select], pw.encode("utf-8"))
+		print("PW changed!")
+
