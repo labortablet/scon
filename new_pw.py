@@ -57,9 +57,9 @@ while True:
 	letters = len(str(len(names)))
 	for num, name in enumerate(names):
 		print(str(num).zfill(letters), ": ", name)
-	select = int(input("Give number to change PW:"))
+	select = int(input("Give number to change PW: "))
 	if select < len(names):
-		pw = input("Type Password")
+		pw = input("Type Password: ")
 		new_pw(names[select], pw.encode("utf-8"))
 		print("PW changed!")
 
