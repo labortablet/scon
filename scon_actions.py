@@ -256,6 +256,7 @@ def get_entry(session_id, entry_id, entry_change_time):
 	entry_id = int(entry_id)
 	session_id = uuid.UUID(bytes=_uni2bin(session_id))
 	_cursor.execute("""SELECT
+	user_id,
 	user_firstname,
 	user_lastname,
 	experiment_id,
@@ -279,7 +280,8 @@ def get_entry(session_id, entry_id, entry_change_time):
 		raise Exception("Entry id not unique")
 	entry = entry_list[0]
 
-	(user_firstname,
+	(user_id,
+	 user_firstname,
 	 user_lastname,
 	 experiment_id,
 	 entry_title,
@@ -296,6 +298,7 @@ def get_entry(session_id, entry_id, entry_change_time):
 	entry_current_time = str(entry_current_time)
 
 	return {"status": "success",
+	        "user_id": user_id,
 	        "user_firstname": user_firstname,
 	        "user_lastname": user_lastname,
 	        "experiment_id": experiment_id,
