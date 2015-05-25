@@ -132,7 +132,6 @@ def get_challenge(username):
 	session_id = uuid.uuid4().bytes
 	challenge = uuid.uuid4().bytes
 	(user_id, salt) = _get_userid_and_salt(username)
-	return {"status": "failed", "1": "2"}
 	_cursor.execute(
 		"""INSERT INTO sessions(id, challenge, user_id) VALUES (%s,%s,%s)""",
 		(session_id, challenge, user_id))
