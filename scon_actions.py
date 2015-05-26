@@ -75,6 +75,7 @@ def _enable_db(func):
 
 @_enable_db
 def _get_userid_and_salt(username):
+	username = str(username)
 	_cursor.execute("""SELECT id, salt FROM `users` WHERE email = %s""", username)
 	user_list = _cursor.fetchall()
 	if len(user_list) == 1:
