@@ -15,8 +15,10 @@ import hashlib
 import base64
 import datetime
 
-import pymysql
-
+try:
+	import pymysql
+except ImportError:
+	pymysql = None
 
 _mysql_timestring = '%Y-%m-%d %H:%M:%S'
 
@@ -34,6 +36,19 @@ def _bin2uni(bin):
 	return base64.b64encode(bin).decode("ascii")
 
 
+def _hash_password(password):
+	return hashlib.sha256(password).digest()
+
+
+def _salted_password(password, salt):
+	hash_pw = _hash_password(password)
+	#salted_pw = bcrypt.hashpw(hash_pw, bcrypt.gensalt(10, salt))
+	return hashlib.sha256(salt + hash_pw).digest()
+
+
+def _challenge_response(salted_password, challenge):
+	return hashlib.sha256(challenge + salted_password).digest()
+
 def _removeAttachment(attachment_ref, attachment_type):
 	pass
 
@@ -49,28 +64,33 @@ def _getAttachment(attachment_ref, attachment_type):
 	#needs to return a str object
 	return attachment_ref
 
+if pymysql is not None:
+	def _enable_db(func):
+		global _SERVER_STABLE_RANDOM
+		global _database
+		global _cursor
+		_config = configparser.ConfigParser()
+		_config.read_file(open("/home/lablet/.my.cnf"))
+		_SERVER_STABLE_RANDOM = _config.get('client', 'password')
+		_database = pymysql.connect(unix_socket=_config.get('client', 'socket'),
+		                            port=_config.get('client', 'port'),
+		                            user=_config.get('client', 'user'),
+		                            passwd=_config.get('client', 'password'),
+		                            db="lablet_tabletprojectdb",
+		                            charset='utf8')
+		del _config
+		_cursor = _database.cursor()
 
-def _enable_db(func):
-	global _SERVER_STABLE_RANDOM
-	global _database
-	global _cursor
-	_config = configparser.ConfigParser()
-	_config.read_file(open("/home/lablet/.my.cnf"))
-	_SERVER_STABLE_RANDOM = _config.get('client', 'password')
-	_database = pymysql.connect(unix_socket=_config.get('client', 'socket'),
-	                            port=_config.get('client', 'port'),
-	                            user=_config.get('client', 'user'),
-	                            passwd=_config.get('client', 'password'),
-	                            db="lablet_tabletprojectdb",
-	                            charset='utf8')
-	del _config
-	_cursor = _database.cursor()
+		def do_nothing(func):
+			return func
 
-	def do_nothing(func):
+		_enable_db = do_nothing
 		return func
-
-	_enable_db = do_nothing
-	return func
+else:
+	def _enable_db(func):
+		def nomysql(**args):
+			raise RuntimeError
+		return nomysql
 
 
 @_enable_db
@@ -110,9 +130,8 @@ def auth_session(session_id, response):
 	INNER JOIN `sessions`
 	ON sessions.user_id = users.id
 	WHERE sessions.id = %s""", session_id.bytes)
-	(hash_password, challenge) = _cursor.fetchall()[0]
-	tmp = hashlib.sha256(challenge + hash_password).digest()
-	if _uni2bin(response) == tmp:
+	(salted_password, challenge) = _cursor.fetchall()[0]
+	if _uni2bin(response) == _challenge_response(salted_password, challenge):
 		_cursor.execute("""UPDATE sessions SET authorized = True WHERE sessions.id = %s""", session_id.bytes)
 		_database.commit()
 		return {"status": "success"}
@@ -153,9 +172,8 @@ def auth_session(session_id, response):
 	INNER JOIN `sessions`
 	ON sessions.user_id = users.id
 	WHERE sessions.id = %s""", session_id.bytes)
-	(hash_password, challenge) = _cursor.fetchall()[0]
-	tmp = hashlib.sha256(challenge + hash_password).digest()
-	if _uni2bin(response) == tmp:
+	(salted_password, challenge) = _cursor.fetchall()[0]
+	if _uni2bin(response) == _challenge_response(salted_password, challenge):
 		_cursor.execute("""UPDATE sessions SET authorized = True WHERE sessions.id = %s""", session_id.bytes)
 		_database.commit()
 		return {"status": "success"}

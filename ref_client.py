@@ -6,31 +6,21 @@ __maintainer__ = "Frederik Lauber"
 __status__ = "Development"
 __contact__ = "https://flambda.de/impressum.html"
 
+
 import json
-import hashlib
 import urllib.request
 
-import bcrypt
-from scon_actions import _uni2bin, _bin2uni, _gensalt
+from scon_actions import _uni2bin, _bin2uni, _hash_password, _salted_password, _challenge_response
 
-
-pw_db = "test"
-value_db = _uni2bin("$2y$10$wbBPkWPW3dPqgLNR4GlvGeTqf2pWenxSz5pROlX/VMjmz6h1ye/.a")
-salt_db = _uni2bin("wbBPkWPW3dPqgLNR4GlvGg==")
+def response_from_password(password, salt, challenge):
+	return _challenge_response(_salted_password(password, salt), challenge)
 
 url = 'https://lablet.vega.uberspace.de/scon/db.cgi'
 #url = 'https://lablet.vega.uberspace.de/scon/db_ustest.cgi'
 #url = 'https://lablet.vega.uberspace.de/scon/json_bounce.cgi'
 
 def auth_session(session_id, pw, salt, challenge):
-	salt = _gensalt(10, salt)
-	challenge = _gensalt(10, challenge)
-	hash_pw = hashlib.sha256(pw).digest()
-	salted_pw = bcrypt.hashpw(hash_pw, salt)
-	print("Salted PW: " + salted_pw)
-	response = bcrypt.hashpw(salted_pw, challenge)
-	print("Reponse: " + response)
-	data = {"action": "auth_session", "session_id": session_id, "response": response}
+	data = {"action": "auth_session", "session_id": session_id, "response": _bin2uni(response_from_password(pw, salt, challenge))}
 	return _prepare_data_and_response(data)
 
 def get_last_entry_ids(session_id, entry_count):
@@ -88,17 +78,19 @@ session_id = tmp["session_id"]
 print("Challenge: " + _bin2uni(challenge))
 print("Session_id: " + session_id)
 print("Salt: " + _bin2uni(salt))
-print(salt_db)
 print("Auth session")
-k = auth_session(session_id, "test", salt, challenge)
+k = auth_session(session_id, "test".encode("utf-8"), salt, challenge)
 # should fail
 print(k)
+print("Projects:")
 k = get_projects(session_id)
 print(k)
 # should show nothing
+print("Experiments")
 k = get_experiments(session_id)
 print(k)
-k = get_last_entry_ids(session_id, 1, 20)
+print("No idea")
+k = get_last_entry_ids(session_id, k["experiments"][0][1], 20)
 print(k)
 k = get_entry(session_id, 5)
 print(k)
@@ -106,7 +98,7 @@ print(k)
 
 
 # should work
-k = auth_session(session_id, "test", salt, challenge)
+k = auth_session(session_id, "test".encode("utf-8"), salt, challenge)
 print(k)
 k = get_projects(session_id)
 print(k)
