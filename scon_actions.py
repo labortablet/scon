@@ -9,11 +9,22 @@ __status__ = "Development"
 __contact__ = "https://flambda.de/impressum.html"
 # FIXME document which modules need to be installed for this
 
+_file_folder = "/home/lablet/sconfiles"
+
+
 import uuid
 import configparser
 import hashlib
 import base64
 import datetime
+import os
+
+# attachment types:
+# 	1 = text
+# 	2 = tabular
+# 	3 = picture
+# 	4 = file
+# 	5 = video
 
 try:
 	import pymysql
@@ -50,19 +61,32 @@ def _challenge_response(salted_password, challenge):
 	return hashlib.sha256(challenge + salted_password).digest()
 
 def _removeAttachment(attachment_ref, attachment_type):
-	pass
+	if attachment_type == 1 or attachment_type == 2:
+		pass
+	elif attachment_type == 3 or attachment_type == 4 or attachment_type == 5:
+		os.remove(os.path.join(_file_folder, attachment_ref))
 
 
 def _putAttachment(attachment, attachment_type):
-	#only text right now
-	attachment_ref = attachment
+	attachment_ref = None
+	if attachment_type == 1 or attachment_type == 2:
+		attachment_ref = attachment
+	elif attachment_type == 3 or attachment_type == 4 or attachment_type == 5:
+		filename = uuid.uuid4()
+		while os.path.exists(os.path.join(_file_folder, filename)):
+			filename = uuid.uuid4()
+		with open(os.path.join(_file_folder, filename), "w") as file:
+			file.write(attachment)
+			attachment_ref = filename
 	return attachment_ref
 
 
 def _getAttachment(attachment_ref, attachment_type):
-	#only text right now
-	#needs to return a str object
-	return attachment_ref
+	if attachment_type == 1 or attachment_type == 2:
+		return attachment_ref
+	elif attachment_type == 3 or attachment_type == 4 or attachment_type == 5:
+		with open(os.path.join(_file_folder, attachment_ref), "r") as file:
+			return file.read()
 
 if pymysql is not None:
 	def _enable_db(func):
